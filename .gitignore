@@ -1,0 +1,8 @@
+*.DS_Store
+Rplots.pdf
+header.aux
+header.bbl
+header.blg
+header.log
+header.pdf
+header.pyg

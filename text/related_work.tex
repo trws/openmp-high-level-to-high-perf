@@ -1,0 +1,77 @@
+\section{Related Work}
+\label{sec:related}
+
+% Accelerated OpenMP implementations are beginning to proliferate in industry,
+% including HMPP~\cite{dolbeau2007hmpp}, OpenACC~\cite{openacc},
+% \pgia~\cite{Wolfe:2010bk} and Cray Accelerated
+% OpenMP~\cite{chapman_openmp_2011}. Each one offers a method for a user to
+% target multiple GPUs and CPUs by explicitly splitting the workload and
+% targeting each device with a region or codelet. They do not offer
+% coscheduling within a single region. As they all offer a different
+% implementation of C or Fortran to GPU translation, and do not offer
+% in-region coscheduling, they are orthogonal to our work. We extend this
+% model, using one as a platform for coscheduling.
+
+With the proliferation of GPUs and other computational accelerators, several
+programming models and task schedulers have been proposed specifically for
+these environments.  In addition to the blocked task schedulers,
+StarPU~\cite{Augonnet:2009uc,AugThiNamWac10RR7240} and
+OmpSs~\cite{DURAN:2011uy,Bueno:2012ka}, which we discussed in
+Section~\ref{sec:background}, other designs have been proposed.  Two  major
+factors distinguish our work from these schedulers.  First, they schedule at
+the granularity of discrete tasks, which in each case is defined by a function
+call, and forces the user to select the appropriate granularity of work even
+within a group of related tasks. Second, they require that the task functions
+are implemented in terms of blocks of data.  These blocks generally need to be
+contiguous chunks of data, for common cases StarPU offers ``filters'' as a
+convenient way to divide data into equal size chunks, and recent work on
+OmpSS~\cite{Bueno:2013jd} has added support for potentially non-contiguous
+rectangular regions to be passed to tasks.  With \tsar, a task granularity may
+optionally be used, but is not required and often does not result in the best
+division of work. As to data blocks or transformation of tasks to operate on
+them, \tsar handles unblocked accelerated OpenMP code, preserving the
+semantics of the original parallel region.
+
+More relevant are the approaches taken by Qilin~\cite{Luk:2009gf} and the
+scheduling framework presented by Ravi et al.~\cite{Ravi:2011ie,Ravi:2010hw}.
+These authors present novel heterogeneous programming APIs that support
+adaptive scheduling between CPUs and a GPU. The Qilin API is in the form of a
+C++ template library that operates on special array structures and allows
+runtime generation of CPU and GPU code. Ravi et al.'s work generates CPU and
+GPU code from generalized reduction specifications. Both require
+reimplementation of existing codes in the associated model, constrain the
+adaptive scheduling approach to that used by the respective system, and target
+only one GPU. Qilin uses an adaptive approach similar to the one that we used
+in our previous work on Splitter~\cite{Scogland:2012br} to support one GPU.
+However, they calculate the division in a training pass and simply reuse it in
+latter runs. The framework by Ravi et al. uses a chunk-based mechanism, with
+an option to combine chunks for scheduling on the GPU much in the way our
+dynamic chunk schedule does.  Alternatively, \tsar handles memory movement and
+adaptive scheduling of work while preserving existing code inside the region.
+Further it supports a range of scheduling mechanisms allowing a user to select
+an adaptive or chunk-based approach on a per region basis, as well as
+supporting an arbitrary number of arbitrarily capable GPUs and CPUs.
+
+Our adaptive scheduling policies are also highly related to the approach taken
+by Ayguad\'e et al.~\cite{Ayguade:2003tw} in looking for an alternative to the
+schedule clause in OpenMP.  Rather than employing dynamic, or chunk style
+scheduling, they proposed the use of a learning scheme to do a static split.
+Their specific prediction methods and targets were different from ours, but
+their assertion that the adaptive policies sometimes benefited CPUs as well
+may be another reason to incorporate something like our adaptive schedules into
+OpenMP.
+
+% Finally, HTS~\cite{Scogland:wt} is clearly the most closely related work.
+% Therein the authors investigate extensions to Accelerated OpenMP to
+% support coscheduling across CPUs and one GPU within a region. It evaluates
+% similar schedules to those that we explore in this work, with the limitation
+% that exactly two heterogeneous processors could be uniquely scheduled. \tsar
+% reworks this previous approach by extending the scheduling scheme to apply
+% to an arbitrary number of devices allowing independent scheduling of
+% individual cores as well as multiple GPUs. Most importantly, our new approach
+% does not need to rely on static splitting or underlying schedulers between
+% ``homogeneous'' devices, which allows us to handle some classes of imbalanced
+% workloads directly and to manage NUMA effects within a class of device better.
+
+
+

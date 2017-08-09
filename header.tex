@@ -1,0 +1,202 @@
+\documentclass[journal,compsoc,10pt]{style/IEEETran}
+% \documentclass[10pt]{style/IEEETran}
+% \usepackage{times}
+% \usepackage{fullpage}
+%% \usepackage{latex8}
+\usepackage[pdftex]{graphicx}
+\usepackage{subfig}
+\usepackage[]{rotating}
+\usepackage{url}
+% \usepackage{comment}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{wrapfig}
+\usepackage{epsfig}
+% \usepackage{style/savetrees}
+\usepackage{style/algorithm}
+\usepackage{style/algorithmicx}
+\usepackage{style/algpseudocode}
+\usepackage{amsthm}
+\usepackage{framed}
+\usepackage{fancybox}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage{xspace}
+% \usepackage{tikz}
+\usepackage{listings}
+\usepackage{ifthen}
+\usepackage{balance}
+\usepackage{multirow}
+\usepackage{caption}
+\DeclareCaptionType{copyrightbox}
+
+%conditional so I can compile with minted, others with lstlisting in case they
+%don't have it
+\newif\ifm
+% \mfalse
+\mtrue
+\ifm
+\usepackage{style/minted}
+% \usemintedstyle{friendly}
+\usemintedstyle{bw}
+\fi
+
+\lstset{language=c}
+\lstset{basicstyle=\scriptsize\ttfamily}
+\lstset{keywordstyle=\color{blue}\bfseries}
+\lstset{commentstyle=\ttfamily\color{ForestGreen}}
+\lstset{frame=single,framerule=0.5pt}
+\lstset{belowskip=\smallskipamount}
+\lstset{aboveskip=\smallskipamount}
+\lstset{showstringspaces=false}
+% \lstset{morekeywords={kernel,reduce,__global__,out,float2,float4}}
+% \pagestyle{plain}
+% \pagenumbering{arabic}
+
+\makeatletter
+\newbox\sf@box
+\newenvironment{SubFloat}[2][]%
+{\def\sf@one{#1}%
+\def\sf@two{#2}%
+\setbox\sf@box\hbox
+\bgroup}%
+{ \egroup
+\ifx\@empty\sf@two\@empty\relax
+\def\sf@two{\@empty}
+\fi
+\ifx\@empty\sf@one\@empty\relax
+\subfloat[\sf@two]{\box\sf@box}%
+\else
+\subfloat[\sf@one][\sf@two]{\box\sf@box}%
+\fi}
+\makeatother
+
+  % \let\oldthebibliography=\thebibliography
+  % \let\endoldthebibliography=\endthebibliography
+  % \renewenvironment{thebibliography}[1]{%
+    % \begin{oldthebibliography}{#1}%
+      % \setlength{\parskip}{0.75ex}%
+      % \setlength{\itemsep}{0.75ex}%
+  % }%
+  % {%
+    % \end{oldthebibliography}%
+  % }
+
+  \IEEEoverridecommandlockouts
+
+\begin{document}
+
+\newcommand{\tsar}[0]{CoreTSAR\xspace}
+\newcommand{\tsarlong}[0]{CoreTSAR\xspace(Task-Size Adapting Runtime)\xspace}
+\newcommand{\ctsar}[0]{CoreTSAR\xspace}
+\newcommand{\pgia}[0]{PGI Accelerator\xspace}
+
+\newcommand{\tom}[1]{
+  \begin{framed}
+    \noindent{\color{ForestGreen}{\sc TOM:} \em #1}
+  \end{framed}
+}
+\newcommand{\bronis}[1]{
+  \begin{framed}
+    \noindent{\textcolor{blue}{{\sc BRONIS:} \em #1}}
+  \end{framed}
+}
+\newcommand{\barry}[1]{
+  \begin{framed}
+    \noindent{\textcolor{yellow}{{\sc BARRY:} \em #1}}
+  \end{framed}
+}
+
+\newcommand{\wu}[1]{
+  \begin{framed}
+    \noindent{\textcolor{red}{{\sc WU:} \em #1}}
+  \end{framed}
+}
+
+\graphicspath{{pics/}}
+% \authorinfo{author1 \and author2 \and author3 \and author4}
+% {author's department\\
+% location}
+% \authorinfo{Thomas R. W. Scogland \and Wu-chun Feng }
+% {Department of Computer Science, Virginia Tech, \\
+% Blacksburg, VA 24060 USA}
+% {\{tom.scogland,wfeng\}@vt.edu}
+% \authorinfo{Barry Rountree \and Bronis R. de Supinski}
+% {Center for Applied Scientific Computing, Lawrence Livermore National
+% Laboratory,\\ Livermore, CA 94551 USA\\}
+% {\{rountree,bronis\}@llnl.gov}
+
+
+
+\author{
+\IEEEauthorblockN{Thomas R. W. Scogland Bronis R. de Supinski}\\
+\IEEEauthorblockA{Center for Applied Scientific Computing, Lawrence Livermore National
+Laboratory, Livermore, CA 94551\\
+scogland1@llnl.gov  bronis@llnl.gov}
+
+% \IEEEauthorblockA{Computer Science Department\\
+% Virginia Tech\\
+% Blacksburg, VA 24060 USA\\
+% {tom.scogland,feng}@vt.edu}
+% \IEEEauthorblockA{CASC\\
+% Lawrence Livermore National Laboratory\\
+% Livermore, CA 94551 USA\\
+% {rountree,bronis}@llnl.gov}
+}
+\pdfinfo{
+   % /Author (Thomas R. W. Scogland, Barry Rountree,
+   % Wu-chun Feng, Bronis R. de Supinski)
+   % /Title  (CoreTSAR: Scheduling for Accelerator-aware Runtimes)
+   % /Subject (CoreTSAR: Scheduling for Accelerator-aware Runtimes)
+   % /Keywords (GPU, Heterogeneous, Parallel programming models, Runtime systems)
+}
+
+\title{
+}
+
+
+\date{}
+\maketitle
+
+% \input{text/abstract}
+
+% TODO
+% \begin{IEEEkeywords}
+% GPGPU; OpenMP; Programming models; Co-scheduling;
+% \end{IEEEkeywords}
+
+% \tom{need to update keywords}
+
+% \input{text/intro}
+% \input{text/background}
+% \input{text/design}
+% \input{text/implementation}
+% \input{text/results}
+% \input{text/related_work}
+% \input{text/conclusions}
+% \input{text/acknowledgments}
+
+\begin{spacing}{0.9}
+\bibliographystyle{abbrv}
+% \balance
+\bibliography{bib/tom-papers}
+\end{spacing}
+
+% BIOS START HERE: currently disabled
+
+% \graphicspath{{authors/}}
+%
+% {\footnotesize
+% \input{authors/tom.tex}
+% \vfill
+% \input{authors/wu.tex}
+% \vfill
+% \input{authors/barry.tex}
+% \vfill
+% \input{authors/bronis.tex}
+% }
+
+% BIOS END HERE
+
+\end{document}

@@ -1,0 +1,382 @@
+\section{Design}
+\label{sec:design}
+
+This section presents the design of our proposed extension, schedulers and
+memory management infrastructure. \tsar safely divides annotated,
+un-blocked, serial loops, as used in many traditional OpenMP applications,
+and schedules them across heterogeneous resources. We add a clause to
+Accelerated OpenMP that is similar to the \verb#schedule()# clause. The
+OpenMP programming model imposes the following constraints on our design:
+
+\begin{enumerate}
+
+  \item Use existing, unchanged code in the Accelerated OpenMP loop region;
+
+  \item Treat the accelerated loop as a group of related tasks that are
+    defined by the loop code and the region directive including its
+    associated clauses;
+
+  \item Maintain data consistency outside of the region and do not
+    alter data accesses in the existing loop body although we can
+    extend the data copy clauses of the region.
+
+\end{enumerate}
+
+\noindent By following these constraints we preserve programmability while
+adding significant new functionality.
+
+% \tsar is designed to handle memory management between multiple
+% address spaces, work division and load balancing without a user needing to
+% transform their parallel loops.  While it does require additional annotations to
+% accomplish this, we believe it is currently the only solution which offers these
+% features without a user being forced to explicitly specify individual ``tasks''
+% or a DAG representation for the system to operate on.
+
+\subsection{The Proposed Extension}
+
+The \tsar interface consists of two parts, which Figure~\ref{fig:extension}
+depicts. The \verb#hetero()# clause specifies how to schedule the region
+and which classes of device should be considered. For memory management, we
+add the \verb#part_copy()# clauses to provide the runtime with sufficient
+information to partition input and output data for the region safely.
+
+\begin{figure}[h]
+  \centering
+  \inputminted[fontsize=\scriptsize,frame=single]{c}{snippets/extension.c}
+  {\footnotesize
+    \begin{tabular}{rl}
+      \\
+      \multicolumn{2}{c}{\textbf{hetero() inputs}}\\
+      \hline
+      \verb#<cond>#& Boolean, true=coschedule, false=ignore\\
+      \verb#<devices>#& Allowable devices (cpu/gpu/all)\\
+      \verb#<scheduler>#& Scheduler to use for this region\\
+      \verb#<ratio>#& Initial split between CPU and GPU.\\
+      \verb#<div>#& How many times to divide the iteration space\\
+      &\\
+      \multicolumn{2}{c}{\textbf{part\_copy() and \{de\}persist() inputs}}\\
+      \hline
+      \verb#<var>#& Variable to copy.\\
+      \verb#<size>#& Size of each ``item'' in the array/matrix.\\
+      \verb#<cond>#& Whether this dimension should be copied.\\
+      \verb#<num>#& Number of items in this dimension.\\
+      \verb#<halo>#& Number of halo elements required.\\
+    \end{tabular}
+  }
+  \caption{Our proposed extension}
+  \label{fig:extension}
+\end{figure}
+
+Our clauses are permitted on the accelerator directive or on any top-level
+accelerator loop construct, with the same restrictions as existing accelerator
+loop constructs.  Specifically there must not be inter-iteration dependencies
+other than those handled by reductions. Unlike normal copy clauses,
+\verb#part_copy# is not allowed on data clauses as it only has meaning when
+directly associated with a loop. We still support data regions, but only for
+cases where complete replication of the input/output is desired, as opposed to
+only those data regions that are required. We define the properties of our
+clauses in greater detail in the following sections.
+
+
+\subsection{Scheduling}
+\label{sec:assign}
+
+In order to workshare the iterations in a given region efficiently, we
+must offer appropriate scheduling policies. Each policy in \tsar
+treats the iterations within a loop region as a group of related
+tasks, which allows us to select the scheduling granularity
+adaptively. For example, \tsar can break a region with 10,000
+iterations into four chunks or a thousand or any number less than
+10,000 for scheduling, without modification and without user
+intervention.  This capability is critical for efficiently scheduling
+across heterogeneous systems, as a single grain size is rarely
+appropriate for all available devices.
+
+Existing OpenMP schedules for CPUs divide the iteration space either evenly
+across processors statically or into \emph{chunks} that are assigned
+dynamically. The static version is simple, efficient to implement, and
+consistent, but does not load-balance.  Alternatively, OpenMP's chunk based
+schedules (\emph{dynamic} and \emph{guided}) load-balance well in homogeneous
+architectures. However, they suffer high overhead due to synchronization at
+each work-request and especially as a result of the lack of data locality
+their dynamic algorithms cause. In heterogeneous systems they would also incur
+repeated kernel launches and data transfers.  We dealt with these issues in our
+initial work with \tsar~\cite{scogland:7Hpt64iV}, by designing a set of
+adaptive schedules that statically divide the work within each pass through a
+region but load-balances across passes.  This scheme proved effective, but it
+does not tolerate imbalanced workloads well, whereas chunk-based schemes can.
+To address that case and broaden our evaluation, we have developed a number
+of new chunk-based designs as well as a hybrid of the two approaches.
+
+% \subsection{Ratio Schedulers}
+
+
+% \begin{figure}[t]
+% \begin{center}
+% \includegraphics[width=.8\columnwidth]{schedulers}
+% \end{center}
+% \caption{Scheduler behavior over time}
+% \label{fig:sched}
+% \end{figure}
+
+\subsubsection{Static/Adaptive Schedulers}
+
+Our static and adaptive schedulers~\cite{Scogland:2012br,
+  scogland:7Hpt64iV} predict the time that each device will take to
+complete an iteration in the next pass and generate a single task for
+each device sized such that all finish the region as close to
+simultaneously as possible.  These schedulers make two assumptions:
+(1) the average runtime of an iteration in the region is constant on a
+device; and (2) subsequent passes through the region have the same
+performance ratio as the previous pass. Also, our schedulers begin
+with a default time per iteration for each device until we have
+gathered runtime data. This default is either a user-defined value,
+one saved from a previous run, or one based on the
+formula~\emph{1/(deviceSIMDWidth/baseDeviceSIMDWidth)}.  While we do not
+claim that this formula accurately models the relative performance of
+devices, in practice we have found it to be accurate for dense
+floating-point kernels. We leave further exploration of default values
+as future work.
+
+\begin{figure}[t]
+  \footnotesize
+  \begin{minipage}[b]{1\columnwidth}
+    \begin{minipage}[c]{.41\columnwidth}
+      \begin{align}
+        I     =& \textrm{total iterations}\notag\\
+        i_j   =& \textrm{iterations for}\notag\\
+               & \textrm{compute unit~(CU) j}\notag\\
+        f_j   =& \textrm{fraction of iterations}\notag\\
+               & \textrm{for CU j}\notag\\
+        p_j   =& \textrm{recent time/iteration}\notag\\
+               & \textrm{for CU j}\notag\\
+        n     =& \textrm{number of CUs}\notag\\
+        t_j^{+/-} =& \textrm{time over/under equal\notag}
+      \end{align}
+      % \begin{align}
+      % \label{eqn:o} min(\sum\limits_{j=1}^{n-1} t_j^+ &+ t_j^-)\\
+      % \label{eqn:lps}\sum\limits_{j=0}^n i_j &= I\\
+      % i_2 * p_2 - i_1 *p_1 &= t_1^+ - t_1^-\\
+      % i_3 * p_3 - i_1 *p_1 &= t_2^+ - t_2^-\\
+      % \vdots\notag\\
+      % \label{eqn:lpe}i_n * p_n - i_1 *p_1 &= t_{n-1}^+ - t_{n-1}^-
+      % \end{align}
+    \end{minipage}
+    \begin{minipage}[c]{.56\columnwidth}
+      \begin{align}
+        \label{eqn:o2} min(\sum\limits_{j=1}^{n-1} t_j^+ &+ t_j^-)\\
+        \label{eqn:lps2}\sum\limits_{j=0}^n f_j &= 1\\
+        f_2 * p_2 - f_1 * p_1 &= t_1^+ - t_1^-\\
+        f_3 * p_3 - f_1 * p_1 &= t_2^+ - t_2^-\\
+        \vdots\notag\\
+        \label{eqn:lpe2}f_n * p_n - f_1 *  p_1 &= t_{n-1}^+ - t_{n-1}^-
+      \end{align}
+    \end{minipage}
+  \end{minipage}
+  \normalsize
+  \caption{Our adaptive scheduler's deviation minimization algorithm as a
+    linear program, variables at left}
+  \label{fig:lp_stuff}
+\end{figure}
+
+The linear program in Figure~\ref{fig:lp_stuff} uses the time per
+iteration value for each device to calculate the fraction of the total
+available iterations that should be allocated to each device. In
+words, the program finds the fractions of work that result in the
+minimum deviation between predicted execution times.  (Our initial
+version of this linear program calculated the optimal number of
+iterations directly as an \emph{integer} solution, giving
+theoretically optimal splits based on our model.  This integer solution,
+however, was impractical to run online
+due to high calculation costs.)  The linear program formulated in
+Figure~\ref{fig:lp_stuff} dramatically reduces the calculation costs
+and is designed to still yield an optimal fractional result, allowing
+the solution to be off by up to one iteration on each device but
+decreasing the computation time by several orders of magnitude.
+
+Our \emph{static} schedule applies this linear program to the default, or
+supplied, values once at the beginning of the first pass through a region,
+then reuses the result thereafter.
+The adaptive schedules (\emph{adaptive}, \emph{split} and \emph{quick}) use a
+first pass with the static schedule as a training phase.  The first time that
+we encounter a \tsar region, we assign work based on the static
+schedule and then measure the times on each device. For each following
+scheduling decision, we use measured times per iteration in the linear
+program, converging on a more efficient schedule. Our design
+intentionally includes all recurring data transfer and similar overheads
+required to execute an iteration on a particular device, naturally
+incorporating data transfer and launch overheads.
+
+\emph{Adaptive} trains on the first full pass through the region, then adapts
+at the beginning of each subsequent pass. \emph{Split} is designed to adapt
+within regions that either cannot tolerate a full pass with a poor schedule,
+or only run once per application run. \emph{Split} breaks each pass into
+several evenly split subpasses, based on the \verb#div# input. It treats
+each subpass as the same as a full pass with \emph{adaptive}. While
+\emph{split} provides better, and earlier, load-balancing for some
+applications, it increases overhead in each pass. \emph{Quick} balances
+between \emph{split} and \emph{adaptive} by executing a small subpass for its
+first training phase, similarly to \emph{split}. It then schedules and runs
+all iterations remaining in the first pass, and uses the adaptive schedule
+for all subsequent passes. This schedule suits applications that cannot
+tolerate a full pass using the static schedule or the overhead of extra
+scheduling steps in every pass.
+
+\subsubsection{Chunk Schedulers}
+
+Chunk schedulers are exemplified by the OpenMP \emph{dynamic} schedule, in
+which a chunk size specifies the number of iterations assigned to each thread
+each time it requests work.  These schedulers effectively use a work queue approach, which
+offers natural load balancing. While it is a classic load balancing approach,
+it is most effective when used with homogeneous computing resources with fast
+synchronization mechanisms, which is not the environment that \tsar targets.
+Thus, we present variations on this method for hybrid systems.
+
+Specifically, we design three new schedules (\emph{chunk}, \emph{chunk static}
+and \emph{chunk dynamic}). \emph{Chunk} serves as our baseline chunk
+scheduler, and is functionally identically to OpenMP's \emph{dynamic}
+schedule. \emph{Chunk static} scales the chunk size for each device based on
+the same scheme used in the \emph{static} schedule above. Thus, larger chunks
+are provided to devices with greater compute power.  Finally, \emph{chunk
+  dynamic} begins in the same way as \emph{chunk static} then dynamically
+adapts the chunk size for each device based on their performance.  Unlike the
+adaptive schedulers, it does not employ the linear program to determine the
+new chunk size since the chunk schedulers do not have a natural barrier point
+where all times have been updated. Instead, it employs an annealing approach
+that computes a weighted average of the time per iteration for each device,
+and attempts to reduce the time per iteration by increasing or decreasing the
+chunk sizes. For example, if the time per iteration on a device decreases with
+an increased chunk size, \emph{chunk dynamic} again increases that chunk size.
+In this design, each device is independent and does not block on the others in
+order to adapt.
+
+\subsubsection{Hybrid Scheduler}
+
+In addition to the schedulers that are strictly chunk or ratio based, we also
+investigate a \emph{hybrid chunk} schedule that begins as a chunk dynamic
+schedule and after the first pass transitions into the adaptive scheduler.
+\emph{Chunk dynamic} adapts and load balances quickly during the first pass
+while refining the split. However, after that first pass, it incurs
+unnecessary overhead in contention and memory transfers, where adaptive
+excels.  Using \emph{chunk dynamic} in place of \emph{static} for the training
+phase of \emph{adaptive} naturally fuses the advantages of both schedulers.
+
+\subsection{Memory Management}
+\label{sec:design:memory}
+
+In order to maintain memory coherency across address spaces while dynamically
+splitting the region, \tsar requires information about the memory access
+pattern of each iteration of the loop. The primary design goal of our memory
+manager is to support unblocked input and output data naturally.  Our
+interface covers the majority of common dense storage cases, and can be used
+at some memory overhead with various more complex or sparse schemes,  while a
+method to specify any possible association is an ongoing topic of research,
+including our future work. As we discuss in Section~\ref{sec:imp}, our
+prototype library implements the memory management for all examples evaluated
+in Section~\ref{sec:results}.
+
+For each variable the \verb#part_copy()#, or partial copy, interface requires at
+least a variable name, one dimension to copy, and the number of items in that
+dimension.  Given the clause \verb#part_copyin(a[1:N])#, \verb#a[i]# will be
+copied, where \verb#i# is the current loop iteration, to the device that
+executes that iteration. If a range of \verb#i# from $5-500$ is assigned
+to a device, \verb#a[5-500]# will be copied.  Thus, the partial copy is
+associated with the loop iteration(s) of the loop being split.
+
+% One may specify a size other than that of the type pointed to by the array,
+% and the number of boundary cells on each side for a given dimension.
+% Alternate item sizes allow packed matrices to be copied where iteration $i$
+% may act on more than one item by itself.  Finally, the boundary option adds
+% support for stencil codes and others which require boundary values, those
+% values that are computed and ``owned'' by a different thread or even device
+% around the edge of a task's memory, by copying those values on input but
+% ignoring them on output. A boundary value of two in the first dimension
+% specifies that two items to each of the left and right of \verb#i# should be
+% copied on input but not on output.
+
+Figure \ref{fig:memory-demo} displays two simple examples of patterns produced
+by our memory-association syntax.  The top example specifies that a
+$10\times10$ matrix is being registered to the region, and the iterator will
+be associated with the column dimension, assuming C ordering, since the column
+dimension's condition is true.  The lower example selects the row dimension
+instead, and additionally specifies that one halo element is required on
+either side of that dimension.  This pattern is typical of stencil-type
+computations, where halo values are required as input, but are not updated
+by the device reading them, having the halo argument makes supporting such
+associations natural.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\columnwidth]{memory-demo}
+  \caption{Example memory association patterns, assuming a pass in which two
+    iterations are assigned to the CPU device, and four each to two GPUs.}
+  \label{fig:memory-demo}
+\end{figure}
+
+
+
+% In specifying a second or third dimension, this interface is sufficient to
+% associate items in an array, rows, columns or both rows and columns in 2D
+% matrices, planes or other intersections in 3D space. Figure~\ref{fig:mem-model}
+% offers some examples.
+
+% \begin{figure}[t]
+% \centering
+% \begin{minipage}[b]{\columnwidth}
+% \inputminted[fontsize=\scriptsize,frame=single]{c}{snippets/mem-model.c}
+% \end{minipage}
+% \caption{Example usage of part\_copy.}
+% \label{fig:mem-model}
+% \end{figure}
+
+Our interface does not directly support random access output, reverse indices
+or indirect indices. For input, these can all be supported at the cost of
+additional overhead by copying the entire data set, since the input process
+is non-destructive.
+
+% allow the user to specify the data that each task requires
+% individually as a part of the input and output data blocks. We have provided a
+% simple memory management interface that takes the start of an array or matrix,
+% the size of the element that each task will use, and the number of those
+% elements each task should receive. Combining that with the iteration variable
+% produces the necessary data for a given task.  This approach supports simple
+% determination of the regions necessary for runs of successive tasks.  While this
+% simple pattern clearly will not work for all applications, we have found that
+% many applications can use this interface without modification.  Either it
+% naturally associates tasks to data, which is common since it is best for
+% cache-locality, or tasks require the entire data region, as with random or
+% unpredictable accesses. Future work will develop a more comprehensive
+% specification methodology.
+
+\begin{figure}[t]
+  \centering
+  \begin{minipage}[b]{\columnwidth}
+    \inputminted[fontsize=\scriptsize,frame=single]{c}{snippets/auto.c}
+  \end{minipage}
+  \caption{Our proposed extension to accelerated OpenMP.}
+  \label{fig:ctsar-ext}
+\end{figure}
+
+
+\subsection{Example Usage}
+
+% \tom{consider moving this after the following two sections so that it makes
+% more sense, also moves it closer to the implementation so it could be combined
+% with the library source figure}
+
+Figure~\ref{fig:ctsar-ext} shows how to use our proposed interface to
+implement the example in Figure~\ref{fig:omp-acc}. All options, including
+those that use default values, are specified for \verb#part_copyin(a...)# and
+\verb#hetero(...)# in the example. The minimum necessary to specify the copy
+correctly are used for \verb#part_copy(c...)#.  In this example, the loop will
+always be split across devices using the adaptive scheduler with the default
+ratio and a div of 10. The copies specify that the \verb#a# array is
+two-dimensional, of size N by N, made up of elements of size \verb#sizeof(T)#,
+and that iteration $i$ requires row $i$ of \verb#a# but not column $i$. The
+\verb#c# copy specifies the same as for \verb#a# except that it should be
+copied both in and out. The traditional \verb#copyin()# clause from
+accelerated OpenMP is used for \verb#b# since all participating devices need
+access to the full region.  Complete output, in the form of \verb#copyout()#,
+is not allowed however because there is no way to resolve the changes between
+versions.  We may investigate this in future work.
+

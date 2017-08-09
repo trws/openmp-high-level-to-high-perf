@@ -1,0 +1,439 @@
+\begin{table*}[t]
+    \centering
+    \scriptsize{
+    \begin{tabular}{|l|l|l|l|r|l|l|l|l|r|l|}
+\hline
+		    & CPU     & CPU       & CPU  & CPU         & GPU             & GPU   & GPU   & GPU\\
+	System name & Model   & Cores/die & Dies & RAM (MB)    & Model           & Cards & Cores & RAM (GB)\\
+\hline
+	amdlow3     & E3300   & 2         & 1    & 2,012       & Tesla C2050     & 1     & 448   & 3\\
+	armor1      & E5405   & 4         & 2    & 3,964       & GeForce GT 520  & 1     & 48    & 1\\
+	dna2        & i5-2400 & 4         & 1    & 7,923       & GeForce GTX 280 & 1     & 240   & 1\\
+	escaflowne  & X5550   & 4         & 2    & 24,154      & Tesla C2070     & 4     & 448   & 6\\
+	hokiespeed  & E6545   & 6         & 2    & 24,154      & Tesla M2050     & 2     & 448   & 3\\
+\hline
+
+    \end{tabular}
+    }
+    \caption{Test system specifications, all CPUs and GPUs are made by Intel and NVIDIA respectively.}
+    \label{tab:systems}
+\end{table*}
+
+\section{Evaluation}
+\label{sec:results}
+
+This section evaluates the \tsar library. We compiled all benchmarks with the
+\pgia compiler compiler suite version 12.9.  Optimization flags are \verb#-acc -ta=nvidia -O3 -mp=allcores#.
+Table~\ref{tab:systems} lists our test platforms. Unless otherwise specified,
+tests were run on escaflowne.  In tests with
+GPUs enabled, one CPU core is used to control each selected GPU and does not do
+computation. We use default scheduler parameters unless otherwise specified,
+with the initial split calculated at runtime based on the available resources
+and a div of 10. We include all scheduling overhead, GPU data transfer time,
+and synchronization time in all measurements.
+
+% We evaluate \tsar with four applications and all 15 benchmarks from the
+% PolyBench/GPU~\cite{GrauerGray:ur}, suite which we accelerated using the \pgia
+% directives and the \tsar library. The applications are
+% GEM~\cite{anandakrishnan_accelerating_2010}, k-means,
+% CG~\cite{bailey_nas_1991}, and Helmholtz. We chose these applications because
+% they provide a range of application behaviors in terms of data sizes, region
+% lengths, and GPU suitability. Also, they cover many potential corner cases and
+% difficult situations that \tsar would face in real world use. 
+
+Reported times and speedups include all activity that the original OpenMP CPU
+code did not require, such as library initialization, scheduling, and memory
+movement. We do not include application IO or problem setup that is shared
+between CPU, GPU and scheduled versions. We also record the time for each
+device to complete its assigned iterations, from which we can compute the time
+that devices wait for others to complete, the time spent to calculate the
+split for the next pass and, as a subset of that, the time to solve the linear
+program. Finally, we track the time per iteration for each device, as
+described in Section~\ref{sec:design}.
+
+\subsection{Benchmarks}
+
+We use four applications and the PolyBench/GPU~\cite{GrauerGray:ur} benchmark
+suite in our evaluation. CG~\cite{Bailey:1991kk} is a direct port of the NAS
+conjugate gradient benchmark.  GEM~\cite{Anandakrishnan:2010gk} is
+a molecular modeling application for the study of the electrostatic potential
+along the surface of a macromolecule that has been extensively studied for GPU
+optimization~\cite{daga-icpads11-archopt}.  Helmholtz is a discrete finite
+difference code that uses the Jacobi iterative method to solve the Helmholtz
+equation. K-means is a popular iterative clustering method.  Our
+implementations of the 15 PolyBench/GPU benchmarks execute each computational
+kernel 10 times to mimic use in an iterative scientific application more
+closely. Tests at 5 and 15 kernel executions yield similar relative results.
+Since we are evaluating scheduling behavior, and not computational kernel
+performance, we made minimal changes in porting each benchmark. As such, our
+computational kernels are not optimized for the GPU other than by the
+compiler. Nonetheless, \tsar can easily support optimized implementations
+through the same syntax.
+
+For our purposes, benchmarks can be characterized by the number of passes
+through the parallel region that they make, the length of each of these
+passes, and how suitable they are to run on the GPU.  Table~\ref{tab:bench}
+characterizes these properties for each benchmark.  The table exhibits a wide
+range in number of passes through the parallel region --  1 to 1900 passes in
+the applications, and as high as 10240 passes for the GRAMSCHMIDT benchmark.
+Our adaptive scheduler operates primarily at the boundaries of parallel
+regions, so this number can greatly affect our results. For example, in the
+GEM  benchmark, the adaptive schedulers are identical to the static scheduler
+because the training pass is the only pass in the application. Conversely, CG
+performs many short passes, which allows \tsar to adjust scheduling decisions
+but incurs high scheduler overhead and data copy costs.
+
+The table also shows a wide range of performance ratios. Values range from a
+$10\times$ slowdown to a $113\times$ speedup going from eight CPU cores to one
+GPU. Running GEM on only one GPU finishes the problem more than $10 \times$
+faster than on eight server class Intel CPU cores. CORR and COVAR also show
+extreme suitability, largely due to the static schedule employed in the CPU
+tests. Because the workloads are imbalanced, each CPU core performs a
+different amount of work. The GPU test, because of the load-balancing effect
+of over-provisioning work-groups on GPUs, handles this variation better. If we
+use the OpenMP dynamic schedule, COVAR runs in approximately 150 seconds, $10
+\times$ faster than the static performance.  Alternatively, GRAMSCHMIDT and
+Helmholtz are not suited to GPU computation according to these results.
+Generally, the suitabilities match our expectations, with the exception of CG.
+Our previous work, and that of others, has found that CG is suitable for GPUs.
+Some of our experiments on other platforms showed a ratio of approximately
+0.55 on one GPU. Here, the GPU version takes more than $5 \times$ longer than
+the CPU version. This is due to the high cost of data re-distribution across
+GPUs each iteration. We leave optimization of CG to future work.
+
+
+\begin{table}[t]
+    \centering
+\footnotesize{
+    \begin{tabular}{|l|r|r|r|r|r|}
+        \hline
+        Benchmark   & Passes & Time/ & CPU     & GPU   & Speedup \\
+                    &        & pass  & time    & time  & on 1GPU \\
+        \hline
+        CG          & 1900   & 0.045 & 16.31   & 92.37 & 0.17    \\
+        GEM         & 1      & 5.336 & 71.05   & 5.65  & 12.59   \\
+        Helmholtz   & 50     & 0.138 & 1.18    & 7.22  & 0.16    \\
+        kmeans      & 7      & 0.583 & 5.70    & 4.33  & 1.32    \\
+        \hline
+        ATAX        & 10     & 0.646 & 32.23   & 6.60  & 4.88    \\
+        BICG        & 10     & 0.822 & 21.86   & 8.78  & 2.49    \\
+        CORR        & 10     & 0.162 & 157.73  & 1.64  & 96.07   \\
+        COVAR       & 10     & 1.328 & 1558.30 & 13.80 & 112.90  \\
+        FDTD2D      & 5000   & 0.000 & 0.99    & 1.23  & 0.80    \\
+        GEMM        & 10     & 1.262 & 301.34  & 3.04  & 99.18   \\
+        GESUMMV     & 10     & 1.902 & 2.10    & 20.38 & 0.10    \\
+        GRAMSCHMIDT & 10240  & 0.004 & 4.21    & 40.38 & 0.10    \\
+        MVT         & 10     & 0.058 & 1.62    & 0.60  & 2.72    \\
+        SYR2K       & 10     & 1.461 & 14.39   & 15.53 & 0.93    \\
+        SYRK        & 10     & 0.769 & 7.86    & 8.18  & 0.96    \\
+        THREEDCONV  & 10     & 1.031 & 5.77    & 10.95 & 0.53    \\
+        THREEMM     & 30     & 0.284 & 126.03  & 3.78  & 33.35   \\
+        TWODCONV    & 10     & 0.607 & 2.86    & 6.46  & 0.44    \\
+        TWOMM       & 10     & 1.445 & 204.66  & 6.32  & 32.41   \\
+        \hline
+    \end{tabular}
+}
+    \caption{Benchmark characteristics, times in seconds, \\
+             time/pass for static schedule with CPUs and one GPU.}
+    % \vspace{-2em}
+    \label{tab:bench}
+\end{table}
+% \begin{figure}[t]
+    % \begin{center}
+	% \includegraphics[width=\columnwidth]{multi-combined}
+    % \end{center}
+    % \caption{\tsar performance on escaflowne.}
+    % \label{fig:ctsar}
+% \end{figure}
+
+\subsection{Input Parameters}
+
+As mentioned above, we use the default values for our tests unless otherwise
+specified. However, chunk size does not have an obvious default.
+Figure~\ref{fig:chunk-size} illustrates the performance for the basic chunk
+scheduler across chunk sizes for each benchmark using one GPU. We do not
+report chunk sizes in terms of absolute iterations, which has little meaning
+across benchmarks. Instead, we compare by the number of chunks into which the
+region is partitioned. The performance of some applications varies little
+based on chunk size. Others, such as CORR and COVAR, have a range of as much as
+$3\times$. These ranges shift or even reverse in some cases as the number of
+GPUs or scheduler changes, creating even more variability. Due to the
+sensitivity to this parameter, all subsequent results for chunk-based
+schedulers use the best chunk size for that benchmark, scheduler, and GPU
+count combination.
+
+\begin{figure}[t]
+        \includegraphics[width=\columnwidth]{chunks-current-flipped}
+        \caption{Performance across chunk sizes for each benchmark with the
+        basic Chunk scheduler}
+	\label{fig:chunk-size}
+\end{figure}
+
+
+
+\subsection{\tsar Performance}
+\label{sec:orig}
+
+We begin with an evaluation of the overall speedup achieved for benchmarks
+across schedulers and GPU counts on escaflowne, as
+Figure~\ref{fig:performance} depicts.  All plots are based on the speedup over
+a chunk-based CPU schedule equivalent to OpenMP's dynamic schedule across the 8
+CPU cores. We can group these results roughly into three groups of behavior:
+those that scale to all four GPUs; those that benefit from GPUs but do not
+scale to more than one; and GPU-averse applications.
+
+
+\begin{figure*}[p]
+        \includegraphics[width=\textwidth]{current-combined-part}
+        \caption{Performance across schedulers and number of GPUs for all
+        benchmarks, normalized to CPU OpenMP across 8 cores.}
+	\label{fig:performance}
+\end{figure*}
+
+% \begin{figure*}[t]
+    % \centering
+    % \subfloat[\tsar speedup using one GPU across schedulers]{
+        % \includegraphics[width=\columnwidth]{full-bind-1gpu}
+        % \label{fig:1gpu}
+    % }
+    % \subfloat[\tsar speedup across schedulers and number of GPUs for GPU
+    % amenable benchmarks]{
+        % \includegraphics[width=\columnwidth]{full-bind-combined-part}
+        % \label{fig:multi}
+    % }
+    % \caption{\tsar evaluation on escaflowne.}
+    % \label{fig:large-eval}
+% \end{figure*}
+
+\subsubsection{GPU Amenable Applications}
+
+Eleven benchmarks scale to four GPUs on escaflowne, resulting in between
+$3.5\times$ and nearly $200\times$ speedup. First  GEM, GEMM, kmeans, SYRK,
+SYR2K, TWOMM and THREEMM scale nearly linearly from one to four GPUs, missing
+linear only because of the use of one CPU core for the addition of each GPU.
+Slightly off of linear are CORR and COVAR, which gain performance at
+approximately one quarter of that rate, but consistently up to all four GPUs.
+Also in this group are ATAX, BICG, and MVT, which clearly taper off after two
+GPUs, since these benchmarks do not have enough work available at this problem
+size, to occupy all four GPUs fully. Further, we cannot  increase the problem
+size without overflowing the GPU memory due to the way \tsar's memory model
+currently handles mappings. In another peculiarity of these three benchmarks,
+the chunk scheduler performs almost identically to the CPUs. While all three
+reap significant performance benefits when run on GPUs, they are the only
+benchmarks that use column-wise partial copies. The overhead of column-wise
+copies for each chunk apparently causes the runtime to deactivate all GPU
+threads for the basic chunk scheduler.
+
+In terms of individual benchmark behavior, GEMM achieves the most speedup,
+which occurs with the static GPU-only configuration. While this schedule is
+not an adaptive, it is still facilitated by \tsar, and for extremely GPU
+suitable applications can outperform the adaptive schedules. The CORR and
+COVAR benchmarks superficially behave similarly, but for a different reason.
+In their imbalanced workloads, each iteration $i$ does $n - i$ units of work.
+Thus, they violate the assumption of the adaptive schedulers that the average
+work per iteration is constant. We expected one or more of the chunk
+schedulers would perform best in this scenario, but both CORR and COVAR are
+highly sensitive to overhead, and cannot tolerate the additional launches and
+copies of the chunk schedulers. Thus, the static schedulers (GPU and static)
+perform best in most cases. In the four GPU case for each, however, the split
+scheduler surges ahead.  Split \emph{stops using the CPU cores} and schedules
+across the GPUs in the three and four GPU cases. Our linear program does not
+handle varying time per iteration with heterogeneous hardware, but given
+relatively homogeneous hardware it handles the heterogeneous iterations much
+better.
+% Figure~\ref{fig:adaptive-gpu} presents the results of running with the
+% adaptive schedule configured to use only GPUs. 
+Using only GPUs, no CPU cores, with the Adaptive schedule achieves a further
+10-20\% performance improvement over the next best schedule in each case for
+CORR and COVAR.
+
+% \begin{figure}[t]
+%         \includegraphics[width=\columnwidth]{dyn-gpu}
+%         \caption{CORR and COVAR performance with an adaptive GPU schedule.}
+% 	\label{fig:adaptive-gpu}
+% \end{figure}
+
+
+Also unexpectedly, kmeans performs best with the basic chunk scheduler. With a
+precisely selected chunk value kmeans does quite well but, as
+Figure~\ref{fig:chunk-size} shows, its performance varies by as much as 50\%
+across chunk sizes we tested.  The adaptive schedulers are more robust in that
+they do not require users to search the input space in order to find a
+reasonable initial parameter.
+
+Overall \tsar scales well to at least four GPUs without loop body or memory
+layout changes for GPU-amenable applications. Further, each scheduler is
+stronger for certain tasks than others, and the adaptive scheduler is the
+best overall choice, even with the best chunk sizes for chunk schedulers.
+It remains stable, and within approximately 10\% of optimal for all amenable
+benchmarks with homogeneous iterations. For heterogeneous iterations, static
+and chunk are better options.
+
+\subsubsection{GPU-Averse Applications}
+
+These are applications that \emph{do not} run well on GPUs. Some are so
+sensitive to it that running any part of the job on a GPU causes slowdown.
+These are included to evaluate \tsar's response to regions that should not use
+GPUs, or to running normally amenable applications on a system where the
+accelerator is particularly slow. While Jacobi solvers in general, and
+Helmholtz solvers in particular, are not GPU averse as a class, the
+implementation of Helmholtz that we evaluate is. Our Helmholtz is a generic
+CPU OpenMP version that runs correctly but slowly when compiled for the GPU.
+It never performs better by using a GPU for any work. This category
+also includes three PolyBench/GPU benchmarks (FDTD2D, GESUMMV and
+GRAMSCHMIDT).  Each runs slower on a GPU than on one CPU or runs many passes,
+accentuating copy overhead.
+
+In each case, schedulers that run more often, and thus convert the GPU threads
+to CPU threads faster, incur less performance loss. For the same reason, GPU-averse
+benchmarks that run many small passes perform better. For example, GESUMMV suffers
+more than the others by running 10 passes rather than 50 or thousands.
+For each of these benchmarks, the ability to convert GPU control threads to
+CPU threads is crucial.  Without GPU backoff support, the total runtime of
+Helmholtz more than doubles for both adaptive and chunk based schedules, and
+as much as triples for the split schedule.
+
+Three other benchmarks (CG, THREEDCONV, and TWODCONV) fall into this category,
+but only marginally. Each can benefit from the first GPU. GPUs complete
+iterations faster than CPUs for these benchmarks, but they only have enough
+work to saturate a single GPU, or face increasing data transfer overhead as
+more are added. CG passes through the region enough times (1,900) that all but one
+GPU are converted to CPU threads very early in the computation, so it achieves
+roughly constant performance from one to four GPUs. The convolution codes do
+not run long enough to hide the overhead of extra GPUs enabled in the first
+few passes and show degrading performance.
+
+\subsection{Adaptation Across Machines}
+\label{sec:multi}
+
+We now evaluate \tsar's performance across several disparate systems. All
+systems run the same OS image and execute identical binaries for all tests.
+Table~\ref{tab:systems} lists the hardware in each system in detail. Of
+particular interest are the GPU-centric system amdlow3, which contains a
+dual-core Intel Celeron processor and NVIDIA C2050 GPU, and the CPU-centric
+system armor1 with two quad-core Intel Xeon cores and a low power NVIDIA GT
+520 GPU.
+
+%\begin{figure*}[t]
+    %\centering
+    %\subfloat[\tsar speedup across systems]{
+        %\includegraphics[width=\columnwidth]{machines-wrapped}
+	%\label{fig:nodes}
+    %}
+    %\subfloat[Work distribution across devices with the Adaptive scheduler]{
+        %\includegraphics[width=\columnwidth]{assignments}
+        %\label{fig:assignments}
+    %}
+    %\caption{\tsar evaluation across machines}
+    %\label{fig:bignodes}
+%\end{figure*}
+\begin{figure}[t]
+        \includegraphics[width=\columnwidth]{machines-wrapped}
+        \caption{\tsar speedup across systems}
+	\label{fig:nodes}
+\end{figure}
+
+As some of our benchmarks require more memory than the smaller GPUs posses, we
+selected a representative subset (CG, GEM, kmeans, and SYR2K) with problem
+sizes that fit onto all evaluated GPUs.  Figure~\ref{fig:nodes} shows results
+for these benchmarks across all five test platforms.  The most prominent
+feature of the results across systems is the significant change in overall
+speedup. In particular, amdlow3 exhibits consistently high speedups using the
+GPU, partly due to the extreme imbalance between its Intel Celeron processor
+and NVIDIA C2050 GPU. Even CG shows material speedups on amdlow3, as much as
+$2 \times$. More importantly, even though speedup and overall performance
+shift across the various systems for each benchmark, the distribution of
+performance by scheduler is similar.  Thus, the right \tsar scheduling
+algorithm is more related to the application than the hardware.  Allowing the
+scheduler to be determined once per region, rather than once per machine.
+Further, these results show that the default adaptive scheduler is effective
+across hardware configurations, with only GEM as an issue, as a result of its
+single iteration. GEM's strong performance on the other devices also showcases
+the portability of our computed default division of work, which for that
+application is consistently near the best.
+
+%We investigate the actual division of work between different processing
+%elements in Figure~\ref{fig:assignments}. Each benchmark has a distinct
+%pattern, with CG using mostly CPU cores and GEM using the GPU almost entirely.
+%While the distribution of overall performance in Figure~\ref{fig:nodes} shows
+%that the Adaptive scheduler often achieves high performance, the work
+%division shows how differently each machine behaves, which \tsar hides.
+
+\subsection{Comparison with Blocked Task Schedulers}
+\label{sec:ompss}
+
+In order to compare \tsar's scheduling with a state of the art heterogeneous
+task scheduler, we employ those designed to support blocked task models.
+Specifically we port three benchmarks (GEMM, kmeans, and Helmholtz) to two
+freely available implementations of this type of model, OmpSs and StarPU. As
+with Accelerated OpenMP and \tsar, we use the most straightforward port
+possible, transforming only the loop regions that \tsar targets.  For
+example, Figure~\ref{fig:omp-acc} lists a literal transcription of the GEMM
+implementation on OmpSs, calling functions defined in Figure~\ref{fig:omp-acc}.
+
+In order to provide an accurate comparison, the \tsar codes evaluated here use
+the CUDA and C functions created for OmpSs and StarPU rather than using
+Accelerated OpenMP. In fact these functions were compiled into a single object
+file with nvcc that was then linked with the \tsar, OmpSs and StarPU
+scheduling code, thus all three are scheduling over \emph{identical} compute
+kernels.  The OmpSs version was run with the versioning-stack scheduler, to
+support alternative implementations, as well as flags to allow prefetching and
+overlapping of data transfers for benchmarks where these offered speedup
+(slowdown was observed in one case).  The StarPU implementations used the
+``dmda'' scheduler with the history-based performance model, trained on at
+least ten runs before results were collected.  
+
+
+%\begin{figure}[t]
+    %\centering
+    %\begin{minipage}[b]{\columnwidth}
+        %\inputminted[fontsize=\scriptsize,frame=single]{c}{snippets/GEMM-mixed.c}
+    %\end{minipage}
+    %\caption{\tsar scheduled GEMM using OmpSs style functions on all cores and
+    %GPUs of escaflowne.}
+    %\label{fig:ctsar-ompss-GEMM}
+%\end{figure}
+
+GEMM and Helmholtz run each row of the main outer loop as an individual task.
+The outer loop for kmeans is fine grained, so we block it into chunks of 1000
+iterations for OmpSs and StarPU, and also use 1000 iteration chunks as the
+default for \tsar's \emph{chunk} schedulers although we allow it to adapt at
+runtime where capable. Each only copies the data necessary for a given task.
+For example, we only request the three rows necessary for a given Helmholtz row.
+We also disable \tsar's persistent memory support, since OmpSs does not provide an
+equivalent feature, though StarPU does.
+
+\begin{figure}[t]
+    \begin{center}
+        \includegraphics[width=\columnwidth]{ompss}
+    \end{center}
+    \caption{Comparison of \tsar with OmpSs and StarPU.}
+    \label{fig:ompssres}
+\end{figure}
+
+Figure~\ref{fig:ompssres} presents the speedup results, calculated as speedup
+over all 8 CPU cores with the OpenMP dynamic schedule, with OmpSs and StarPU
+on the far right. While unrelated to the performance comparison, Helmholts
+shows a performance benefit using GPUs in this case. In truth, the CPU version
+compiled with gcc is significantly slower ($9\times$) than the version
+evaluated earlier, while the CUDA and OpenACC versions perform similarly. 
+
+Each of StarPU and OmpSs are block schedulers, operating much like our Chunk
+scheduler, and so we expect that they would perform similarly. The expectation
+holds holds for Helmholtz, wherein OmpSs performs almost identically to \tsar's
+Chunk scheduler with StarPU trailing by roughly 50\%.  In kmeans and GEMM
+each performs quite differently, with  OmpSs and StarPU outperforming Chunk on
+kmeans and being heavily outperformed by it in GEMM.
+
+While the computation and data transfers are nearly identical between the
+schedulers, the performance of \tsar using one of the granularity adapting
+schedulers is consistently higher due to reduced overheads.  Since \tsar never
+explicitly creates the individual tasks, it never pays the cost to allocate or
+to initialize them, only paying for the aggregate tasks it runs.  This benefit
+is especially noticeable in GEMM where \tsar is $3\times$ faster than OmpSs
+and $2\times$ faster than StarPU scheduling the same work.  Given the ability
+to adapt task granularity at runtime, all three would yield similar
+performance. It may be worthwhile to consider adding \tsar, or a similar
+task-splitting design, to each of OmpSs and StarPU to reduce overhead for this
+type of computation.
+

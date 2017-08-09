@@ -1,0 +1,303 @@
+\section{Implementation}
+\label{sec:imp}
+
+We implement \tsar as a C library on top of Accelerated OpenMP, tested with \pgia
+and Cray's Accelerated OpenMP. Our evaluation in this paper
+focuses on \pgia, so our examples use its directive format.  This section
+discusses our implementation including its portability, API and our memory
+manager as well as some necessary deviations from the design discussed in
+Section~\ref{sec:design}.
+
+\subsection{GPU Back-off}
+\label{sec:averse}
+
+Some applications are not amenable to being run on GPUs, or at least the GPUs
+present in some systems. While iterations of a region may benefit greatly from
+running on an NVIDIA c2075, they may perform poorly on an NVIDIA GeForce GT
+520. In order to maintain portability across disparate accelerator and CPU
+capabilities, \tsar implements GPU Back-off support in all adapting
+schedulers.
+
+The back-off system is implemented differently for each of the two scheduler
+types.  In the adaptive schedulers \tsar converts a GPU offload thread into a
+CPU thread when the GPU has a higher time per iteration than the slowest CPU
+core for a configurable number of passes (default is two). We use multiple
+iterations since under certain circumstances, such as loading large persistent
+datasets for the first time, or an inappropriate initial amount of work, a
+device can be erroneously classified as slower than the CPUs.  With the chunk
+schedulers, we base the decision on whether a given GPU completes fewer
+iterations than the slowest CPU core during each pass of a configurable number
+of passes. This difference compensates for the sometimes highly variable time
+per iteration when bootstrapping chunk schedulers across initial data copies,
+which can cause false conversions with the adaptive back-off scheme.  We
+discuss the effects of this extension further in Section~\ref{sec:results}.
+
+\subsection{Memory Management}
+\label{sec:memory}
+
+The existing memory interface of Accelerated OpenMP is insufficient to express
+the relationships necessary to handle certain kinds of memory association.
+While Accelerated OpenMP does natively support copying a subset of an array,
+it does not support copying multiple subsets of one array, nor does it support
+non-contiguous rectangular sections such as a subset of the columns of a 2D
+array.
+
+In order to support our desired memory association interface, \tsar
+implements its own memory manager, using the \verb#deviceptr()# clause to pass
+\tsar managed memory into Accelerated OpenMP regions.  We offer a
+straightforward syntax by which users specify the data required by a given
+iteration.  Given that information, \tsar automatically copies the ranges of
+data required by whatever iterations are assigned to a given device for that
+pass.  When possible the memory manager uses pinned memory to accelerate
+copies, as well as asynchronous copies to and from the device in order to
+overlap them with scheduling and synchronization.
+
+Currently, the \tsar memory manager handles a restricted set of partial
+copies.  In addition to the straightforward one-to-one relations, \tsar also
+supports stencils through padding, and row, column or planar associations on
+two and three dimensional matrices.  In order to support reductions we provide
+an API inspired by user-defined reductions in OpenMP 4.0. We discuss the
+details further in Section~\ref{sec:api}. While only a subset of the possible
+cases, these mappings are sufficient to implement all benchmarks evaluated in
+this paper.
+
+\subsection{Data Packing and Padding}
+\label{sec:packing}
+
+%TODO: add discussion of observed iterator values
+%TODO: add discussion of column-wise packing for known-shape accesses vs.
+%      dynamic multi-dimensional arrays
+
+% query ratio off by 0: 1.08
+% query ratio off by 1: 1.848359687
+% query ratio off by 8: 1.6
+
+Our original implementation of the memory interface~\cite{scogland:7Hpt64iV} 
+had a material weakness. That version of \tsar
+allocated the full size of each memory region on each device in order to
+preserve offset accuracy. In other words, any input or output array/matrix
+supplied to \tsar was allocated in full in all participating address spaces.
+Managing subset allocation and access without invalidating offsets and
+iterator values is a difficult problem, especially in languages like C. 
+
+We have redesigned \tsar to support three kinds of regions depending on how
+the data is mapped.  The first, and most simple, case is a one dimensional
+partial array or two dimensional array that is associated by rows.  Since all
+of the resulting subsets are contiguous, the runtime provides an offset
+pointer that can be indexed by the original offsets without issue.  No further
+action or overhead is required for this case, and a significant amount of
+storage on accelerators can be saved.  The second case is where a two or more
+-dimensional array is associated by columns.  \tsar can pack these, but must
+have control over the calculation of offsets into the resulting matrix.  As
+such, we handle this case in our translator for contiguous arrays accessed
+with \verb#array[i][j]# style syntax, but currently do not support 
+dynamically-allocated C arrays accessed with the \verb#array[i*row_size + j]# 
+syntax, though these can be supported by directly using the C API functions.  
+Third, associations can use both the row and column associations, resulting 
+in a region resembling a plus-sign being assigned to each device.  Since these
+require the full range in both rows and columns, even though they may not need
+the corners, \tsar is forced to allocate the full size of such arrays.
+
+By allowing data regions to be packed, \tsar gains two extra capabilities
+beyond reducing memory usage on target devices.  The packing functionality
+allows any chunk-based scheme to place a low bound on memory use by
+selecting a small chunk size. This allows large data sets on the host to
+be streamed through accelerators without enough memory to hold even their
+assigned sub-part of the problem.  When used in this mode however, \tsar
+becomes similar to a blocked-task system, including the increased task
+management and data-transfer overhead that implies.
+
+Perhaps more importantly however, the capability to adjust indexing, as
+described for column-wise associated multi-dimensional arrays, allows regions
+not only to be shrunk to save space, but also padded for alignment. As is
+well known, memory alignment is important for the performance of
+SIMD computations and coalesced memory accesses are important
+to the performance of GPU kernels.  Given the ability to pad rows beyond the
+data assigned to each device, or even rows of data that are mis-aligned by the
+user, \tsar can ensure that each row is aligned for most efficient access on
+each target. We implement this optimization by ensuring that the length of
+each row in a matrix is a multiple of the target device's SIMD width.  While
+in some cases this choice is more strict than required, it is consistently
+sufficient to ensure reasonable alignment.
+
+Figure~\ref{fig:reshape} shows the effect that even small changes in row-width
+can have on performance without padding, and how our auto-padding helps.  The
+figure represents the performance of a general matrix multiplication kernel
+when run with row and column lengths ranging from 8,192 to 8,223 elements in
+increments of one, specifically the x-axis values are the number of elements
+over 8,192 in each row.  On our primary evaluation system, with four c2070
+GPUs, a square matrix of size $8192\times8192$ runs in 7.9 seconds.
+Increasing that size by only one element on each side more than doubles that
+runtime to 19.5 seconds.  In fact, every odd-numbered increase in size takes
+approximately the same increased time, while each power of two increase does
+better up to 16, or a total of 8208, which performs the same as the original
+8192.  Another system with a pair of k20x GPUs shows a nearly identical
+stepped pattern as well.  The difference in performance is somewhat smaller,
+ranging from 10.9 seconds at the zero and 16 positions and 15.2 at the odd
+offsets.The L2 read request performance counters provide a partial explanation
+for the wide range in performance.  When padding is enabled, the difference in
+L2 requests with a multiple of 16 row length is consistently within 10\%; for
+any odd length it balloons to 80\% more L2 accesses for the un-padded version.
+This increase is due to a greater number of reads being required to
+accommodate the mis-aligned read requests of each warp on the GPUs, increasing
+contention and lowering cache efficiency overall.  On the right-hand-side of
+the plot, you can see that \tsar's automatic padding smooths out these issues.
+Also, when dividing a data-set column-wise, this padding support can ensure
+alignment even when the appropriate amount of work to be assigned is not a
+multiple of the target device's native SIMD width, an important consideration
+for several of our benchmarks.
+
+\begin{figure}[t]
+        \includegraphics[width=\columnwidth]{gemm_reshape_range}
+        \caption{Runtime of GEMM kernel on square matrices, statically
+          scheduled across GPUs only with and without auto-padding}
+        \label{fig:reshape}
+\end{figure}
+
+
+\subsection{\tsar API and Usage}
+\label{sec:using}
+\label{sec:api}
+
+% \begin{figure}[t]
+%     \begin{center}
+%         \ifm
+%         \inputminted[fontsize=\scriptsize,frame=single]{c}{snippets/api.c}
+%         \else
+%         \lstinputlisting{snippets/api.c}
+%         \fi
+% 	\end{center}
+%     \caption{\tsar API}
+%     \label{fig:api}
+% \end{figure}
+
+This section describes the low-level API to the \tsar library in detail.
+
+\textbf{ctsar\_init} Initializes an instance of the \tsar runtime, one such
+instance should be used for each region that is to be separately scheduled.
+The parameters allow a user to set the default scheduler, allowed devices, the
+default time per iteration for each accelerator as an array of doubles (NULL
+for defaults), and how finely the split and quick schedulers should divide
+regions (NULL for default).
+
+\textbf{ctsar\_next} Computes the division of work for the region associated
+with \verb#c# based on \verb#size# total iterations.  This function is also
+responsible, updating appropriate memory regions on each target device and
+starting timers to evaluate each device's performance.
+
+\textbf{ctsar\_loop} In order to support \emph{split}, \emph{quick} and the
+chunk schedulers, \tsar must reevaluate the loop with each thread repeatedly.
+The \verb#ctsar_loop# function serves as the condition for a do/while loop
+surrounding each region. In addition to managing repeats, the loop function is
+responsible for synchronization, GPU back-off support, copying data back from
+all devices, completing reductions, and calculating performance statistics at
+the end of each pass.
+
+\textbf{ctsar\_reg\_mem\{\_2d\}} These functions register a host buffer with
+\tsar.  The full version takes a pointer to CPU memory, the size of an element
+of the input data, the number of element in each row/column, the number of
+halo elements required, and a flag option that allows the user to control
+copy direction and type. The non-2D version is shorthand for 1D arrays.  The
+return value is a pointer to the memory assigned to the calling thread, which
+may or may not be identical to the original pointer.
+
+The flags value controls whether memory is copied in or out or both, as well
+as whether to copy persistently, partially by rows or partially by columns and
+whether padding is to be allowed, if it is, an extra output parameter for the
+new row size is required. Partial copies are integral to the correct
+functioning of \tsar as they make automatic merging of output possible. They
+also improve performance of input operations. The 2D interface supports all
+specifications discussed in Section~\ref{sec:design}, except that it does not
+handle matrices with dimensionality higher than 2.
+
+Regardless of the flags, \tsar allocates an appropriate size buffer on the
+device associated with the calling thread. If the region is set to persistent,
+data is immediately and asynchronously copied from the CPU array into the newly
+allocated memory, where it resides until it is explicitly removed with a call to
+\verb#ctsar_unreg_mem()#.
+
+\textbf{ctsar\_unreg\_mem} De-registers the pointer from the region instance,
+frees the memory that stores the state of the data, and frees persistent
+regions.
+
+\textbf{ctsar\_retarget\_mem} Re-target allows a user to specify that the
+region already allocated for pointer \verb#old# should be used to store the
+data pointed to by \verb#new# on all devices.  A typical use is to swap
+buffers for double buffering, although it can also be used to implement
+blocked data transfers by re-targeting a pointer to the new start pointer
+before entering a region.
+
+\textbf{ctsar\_reg\_reduc} This function registers a reduction. Because each
+memory space will have its own reduction result, \tsar must safely initialize
+the temporary variables in each memory space and combine those results into a
+meaningful final value. The identity pointer points to an appropriate initial
+value to use on each device. For example, in a sum the identity would usually
+be 0, in a product 1, and so on.  The \verb#item_size# specifies the size of
+the elements to be reduced.  The \verb#reduc# argument is function pointer
+that should accept two void pointer arguments, the first of which is both a
+value to be reduced and the output, the second is another value to be reduced.
+This function is called repeatedly to accumulate the final value as each
+device finishes execution.  For simple reductions, the body of the function
+can be as simple as \verb#*((int*)a)+=*((int*)b)#.
+
+\textbf{CSTART/CEND} Macros used to retrieve the start and end values to use
+for iteration in the loop region.
+
+
+
+
+%\subsubsection{Example}
+
+\begin{figure}[t]
+    \begin{center}
+        \ifm
+        \inputminted[fontsize=\scriptsize,frame=single]{c}{snippets/manual.c}
+        \else
+        \lstinputlisting{snippets/manual.c}
+        \fi
+
+        % \ifm
+        % \inputminted[fontsize=\scriptsize,frame=single]{c}{snippets/auto.c}
+        % \else
+        % \lstinputlisting{snippets/auto.c}
+        % \fi
+    \end{center}
+    \caption{CoreTSAR library version of GEMM}
+    \label{fig:k-means-split}
+\end{figure}
+
+Figure~\ref{fig:k-means-split} presents an example using this interface to
+implement the extension as presented in Figure~\ref{fig:ctsar-ext}. In this
+example, \tsar is initialized with the adaptive scheduler, default ratio, and
+div of 10. The parallel do-while loop allows our library to reevaluate the
+code region as necessary by looping with the \verb#ctsar_loop(s)# call until
+done. The data regions are registered, as partial input, complete input, and
+partial input/output, and the appropriate pointers for those data regions on
+each device are returned into the local copies of pointers \verb#a#, \verb#b#
+and \verb#c#. The \verb#ctsar_next()# call calculates the number of iterations
+to be completed in this pass by each device. Once it is complete, the
+\verb#CSTART()# and \verb#CEND()# macros return the appropriate iterator range
+values for the device that evaluates them.  This syntax can either be used
+manually, or generated by our python/libclang-based source-to-source
+translator.
+
+While the code is extended significantly around the loop, we do not replicate
+or alter any code in the loop body. The Accelerated OpenMP \verb#if()# clause
+determines if a thread runs on a GPU or CPU core. If the device is a CPU, the
+loop is run serially on the associated core completing its assigned
+iterations. If it is a GPU-controlling thread, the \verb#acc region# directive
+workshares the assigned iterations across the associated GPU.  All codes used
+in our evaluation are implemented in this fashion.
+
+% \subsection{Portability}
+% \label{sec:port}
+
+% Currently \tsar assumes that OpenMP manages CPU threads, and that accelerators
+% are CUDA-enabled GPUs. Thus, we use \verb#omp_get_thread_limit()# to
+% determine the number of CPU resources, \verb#cudaMalloc()/cudaMemcopy()# to
+% allocate and to manage accelerator memory and \verb#cudaGetDeviceProperties()#
+% to read the number of cores and capabilities of the GPU for initial performance
+% estimation. Our design does not require these assumptions so we could easily
+% add other targets or replace these interfaces.
+
+

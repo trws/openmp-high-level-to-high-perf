@@ -1,0 +1,111 @@
+%%TOM: moved up to get this on page 2
+\begin{figure*}[t]
+	\centering
+        \begin{minipage}[b]{1.1\textwidth}
+            \begin{minipage}[b]{.41\textwidth}
+                \ifm
+                \inputminted[numberblanklines=false,linenos=true,fontsize=\scriptsize,frame=single]{c}{snippets/omp_acc.c}
+                \else
+                \lstinputlisting{snippets/omp_acc.c}
+                \fi
+                \ifm
+                \inputminted[numberblanklines=false,linenos=true,fontsize=\scriptsize,frame=single]{c}{snippets/cuda.c}
+                \else
+                \lstinputlisting{snippets/cuda.c}
+                \fi
+            \end{minipage}
+            ~
+            ~
+            ~
+            ~
+            \begin{minipage}[b]{.46\textwidth}
+                \ifm
+                \inputminted[numberblanklines=false,linenos=true,fontsize=\scriptsize,frame=single]{c}{snippets/ompss.c}
+                \else
+                \lstinputlisting{snippets/ompss.c}
+                \fi
+            \end{minipage}
+        \end{minipage}
+	\caption{A basic GEMM kernel as implemented in OpenMP variants (top
+        left), CUDA (bottom left) and OmpSs (right).}
+	\label{fig:omp-acc}
+\end{figure*}
+
+
+
+\section{Background and Motivation}
+\label{sec:background}
+
+As heterogeneous systems spread through the marketplace, so do
+programming models that target them. While a variety of programming
+models exist, most
+%appear to
+fit into one of three categories: (1) loop-offload models; (2)
+block-and-grid models; and (3) blocked-task models.
+
+Loop-offload models include variants of Accelerated
+OpenMP~\cite{Beyer:2011ib}, OpenACC~\cite{openacc}
+HMPP~\cite{dolbeau2007hmpp}, PGI accelerator
+directives~\cite{Wolfe:2010bk}, and Intel OpenMP offload extensions for their
+Xeon Phi coprocessors.
+They extend an OpenMP-like annotated, serial, source model with
+data-movement declarations to offload work to a device with a distinct
+address space. The top left of Figure~\ref{fig:omp-acc} shows a basic
+molecular modeling kernel (GEMM) implemented serially with OpenMP,
+Accelerated OpenMP, and our proposed Accelerated OpenMP extensions.
+With no pragmas, the loop runs serially, as one would expect. The
+OpenMP pragma on line~4 workshares the loop across CPU cores.
+Accelerated OpenMP's pragma (lines 6-7) adds explicit \emph{in}
+copies of the \verb#a# and \verb#b# arrays and an \emph{inout} copy of
+\verb#c#.  Each of these first two pragmas workshares the loop
+iterations across a single address space, \emph{either} CPU cores
+\emph{or} a single GPU.  We discuss the third pragma at the end
+of this section.
+
+Block-and-grid models include CUDA~\cite{nvidia2007cuda} and
+OpenCL~\cite{opencl}. These low-level models specifically target
+GPU-like hardware by offloading blocks or groups of threads to an array of
+cores, each of which is a SIMD unit. Generally these cores share memory with
+one another but not directly with the CPU. The lower left of
+Figure~\ref{fig:omp-acc} shows an example using CUDA.  In addition to changing
+the array accesses, explicit memory allocation and copies are required to move
+data to and from the device. The loop is converted into a grid of threads,
+each of which executes a single iteration in the \verb#cudag()# kernel, which
+must be called with the number of blocks and threads per block. As with the
+loop-offload example, this code uses exactly one GPU.
+
+Blocked-task models, like OmpSs~\cite{DURAN:2011uy} and
+StarPU~\cite{sips_starpu:_2009}, specify tasks and their dependencies in terms
+of blocks of data (and sometimes other tasks). The right-hand code-block in
+Figure~\ref{fig:omp-acc} uses OmpSs to implement the GEMM kernel with load
+balancing across CPUs and GPUs, so it contains \emph{both} CPU \emph{and} CUDA
+kernels, both aliased to the \verb#gemm()# function by the compiler.  Each
+call to \verb#gemm# is given the start address of the block, in this case a
+row, to process.  These calls are converted into tasks, which are enqueued
+into the OmpSs runtime with their data.  Each task can then be scheduled,
+individually, on any device an implementation is available for.  Since the
+task size is \emph{fixed}, each task must encompass enough work to occupy all
+compute units on a GPU long enough to amortize the overhead of scheduling it;
+on the other hand, each task must also be small enough not to overload a
+single CPU core.
+
+
+Each programming model has its advantages and disadvantages.  The
+block-and-grid approach (e.g., CUDA or OpenCL) is highly efficient on the GPU
+and offers maximum control over them. The loop-offload version requires the
+least change from serial or OpenMP code, but it offers less control.
+Blocked-task models offer control through direct use of the other models as
+well as automatic load-balancing across all compute resources.  Unfortunately,
+they also require the greatest departure from the original code.
+
+Therefore, we need a programming model that offers the performance of
+block-and-grid models, flexibility of blocked-task models, and programmability
+of loop-offload models. Our proposed extensions, along with our prototype
+library implementation, brings us closer to this goal by introducing
+work-sharing across devices to Accelerated OpenMP without requiring a specific
+task granularity from the user.  The third pragma, in the upper left of
+Figure~\ref{fig:omp-acc} (lines~9-11) illustrates how our proposed extension
+would work-share the GEMM loop across an arbitrary number and type of
+supported devices. Thus, it offers more flexibility in the region than even
+blocked-task models, while maintaining the serial loop as written.
+
