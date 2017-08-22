@@ -3,17 +3,17 @@
 
 1. Intro
   A. History of spec releases
-2. Philosophy
+2. Philosophy - mission statement
   A. Serial equivalence
   B. Performance/parallelization annotations
   C. Language independence (do vs for, callback to history?)
   D. Relationship to the base language code? Restrictions?
-  E. More?
+  E. More? Turing complete?
 3. Concepts and Mechanics
   A. Outlining
   B. Data environments/privatization
   C. Scoping / ICVs
-4. Recent extensions (
+4. Recent extensions
   A. 4.0 & 4.5
   B. devices
   C. SIMD
