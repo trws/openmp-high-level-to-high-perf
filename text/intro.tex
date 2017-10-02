@@ -1,117 +1,83 @@
 \section{Introduction}
 \label{sec:intro}
 
+The OpenMP effort began in 1996 with a handful of vendors (DEC, HP, IBM, Intel,
+Kuck and Associates, and SGI) came together to create a portable application
+programming interface (API) for shared memory computers.  Vendors do not
+typically work well together unless an outside force compels cooperation.  In
+this case, that compulsion came from the parallel tools team working within the
+Accelerated Strategic Computing Initiative~(ASCI) who made it clear that to sell
+machines into the ASCI program, a vendor had to join the effort to create a
+portable API for shared memory programming.  DOE researchers played a key role
+in defining OpenMP from the beginning helping to assure that the API met the
+needs of HPC applications programmers.
 
-
-% Heterogeneous compute units within a node have become a fact of life.  Over 60
-% machines on the Top500 list in November of 2012 employ GPUs as accelerators.
-% Computers in the consumer sector, from desktops to phones, are increasingly
-% adopting them as well.  In contrast to their forebears, relying on increases in
-% CPU performance or even number of CPU cores, these systems cannot be fully
-% utilized with legacy code alone.  It is typical for CPU/GPU systems, for
-% example, to derive $50\%$ or more of their peak FLOPS from accelerators. Despite
-% this fact, many users simply continue to run legacy CPU codes on them.
-
-% In response, progressively simpler and more familiar programming models have
-% been created, easing the transition from shared memory thread programming.
-% However, the
-% nearly universal lack in these systems is a mechanism by which to employ
-% \emph{more than one} address space.  For example, using ones CPU cores and a
-% GPU, or multiple GPUs, is generally not possible without significant contortions
-% in even the si
-% to improve the programmability or performance of code on heterogeneous systems.
-% Some accomplish this by creating entirely new programming paradymes
-
-%largely the same as tech-report, decide whether to reword
-
-While heterogeneous systems are becoming more popular, their
-programming models deter many potential users.  Unlike adding more or
-faster CPUs, where existing programming models work without code changes,
-%which work without code changes, 
-programs must be
-explicitly updated to use GPUs and other accelerators. Rather than
-grapple with unfamiliar programming models, users often run their
-CPU-only code on accelerated resources, leaving a significant portion
-of the computing resources idle.  Accelerated
-OpenMP, our term for a class of
-directive-based programming models including OpenMP for
-Accelerators~\cite{Beyer:2011ib} and the PGI accelerator
-model~\cite{Wolfe:2010bk} among others, can ease this transition by
-allowing users to target accelerators with a familiar OpenMP-style
-syntax.
-% This syntax will facilitate the adoption of accelerators in scientific
-% computing, especially for legacy OpenMP applications.
-However, Accelerated OpenMP is not a panacea: current iterations help one
-\emph{move} their computation to a \emph{single} accelerator with
-straightforward syntax. Once
-%so
-moved however, there is no way to workshare a
-loop across multiple devices without \emph{manually} targeting each device.
-
-In order to target, for example, a GPU and four CPU cores, a user must
-manually split the work, run that work on each separate device, and
-manually merge each result.  Any load balancing, coherency, or runtime
-adaptation of any kind must be reimplemented by every user.  So,
-while Accelerated OpenMP can parallelize serial code via annotation, it
-lacks the ability to scale and to load-balance work transparently on the hardware
-found at runtime.
-
-Our work
-%seeks to allow
-enables safe and efficient worksharing across devices in
-Accelerated OpenMP.
-%We must address two primary concerns to offer such a
-%construct.
-To do so, we must address two primary concerns. First, we
-%must
-manage memory input and output across multiple address spaces without
-requiring alterations to the associated parallel loop.  Second, we
-%must
-divide work across devices with vastly different computational
-capabilities fairly and efficiently.  In all, our \tsarlong library
-automates the scheduling, load balancing, and cross-device data
-management for safe and efficient
-%that is necessary to efficiently implement
-%this
-worksharing.
-% construct.
-This paper presents the design and implementation of \tsar and the
-extended Accelerated OpenMP syntax to integrate its functionality.
-Specifically, we make the following contributions:
+The goals of the initial group were spelled out in early public presentations
+about the project\cite{ewomp99}.
+%The OpenMP Architecture Review Board and the future of OpenMP, Tim Mattson,
+%European Workshop on OpenMP, Lund, Sweden, September 30 - October 1, 1999
 
 \begin{itemize}
-
-    \item The design and syntax of a multi-target, worksharing
-      construct for Accelerated OpenMP;
-
-    \item The design, implementation, and optimization of our
-      scheduling and memory management library, \tsar, which can be
-      used with any Accelerated OpenMP compiler/runtime or with CUDA
-      and CPU OpenMP directly;
-
-    \item Seven adaptive scheduling policies, spanning from
-      a low-overhead but
-      coarse-grained adaptive approach
-      to a chunk-based, fine-grained scheduling
-      approach for distributing work.
-
-    \item A rigorous performance evaluation of \tsar
-      that demonstrates how runtime scheduling can significantly
-      improve performance while maintaining programmability.
-
+  \item To define an API that lets programmer write portable, efficient and well
+    understood parallel programs for shared memory systems.
+  \item To produce specifications based on common practice that could be readily implemented.
+  \item To whatever extent makes sense, the API should be consistent between Fortran, C,
+    and C++.
+  \item OpenMP must remain lean and mean; being just large enough to express important
+    control-parallel, shared memory programs  but no larger.
+  \item Legal programs under older versions of the specification must continue to be legal
+    under new specifications.
+  \item To whatever extent possible, correct OpenMP programs should produce the same result
+    when run as serial programs or as parallel programs.
 \end{itemize}
 
-% Our comparison to a state of the art heterogeneous task scheduling library
-% demonstrates the utility of \tsar's ability to adapt task granularity
-% dynamically. Overall, \tsar achieves quantitative benefits of up to 20\% over
-% static coscheduling, and more than 50\% over OmpSs and StarPU.
+The first OpenMP specification  was released in November 1997 at SC'97.   The
+OpenMP community in the late 90's were painfully aware of other parallel
+programming  standardization efforts such as HPF and MPI 2.0; both of which
+suffered from multi-year delays as implementors struggled to produce robust,
+application-ready implementations.  Hence, OpenMP by design was narrowly
+focused on current practice and within a year of its initial release, multiple
+vendor supported implementations were available.
 
-The rest of the paper is composed as
-follows. Section~\ref{sec:background} offers motivation and background.
-Section~\ref{sec:design} describes the design of \tsar,
-including our task management concept, scheduling mechanisms, and
-memory management. Details on our implementation follow in
-Section~\ref{sec:imp}.  Section~\ref{sec:results} present our results.
-Related work follows in Section~\ref{sec:related} and conclusions in
-Section~\ref{sec:conclusion}.
+Over time, additional vendors and research organizations joined the effort.  A
+non-profit corporation, the OpenMP Architecture Review Board, was incorporated
+to reduce the chances that any single vendor could inappropriately dominate the
+standard.
+
+As hardware capabilities and the need to support a wider range of algorithms
+grew, the complexity of the specification expanded.  We can see this in
+Figure~\ref{omppcount} where the pages of the specifications (not including
+appendices or indices) are listed.   The initial OpenMP specification (OpenMP
+Version 1.0 for Fortran) was around 45 pages long.  The  latest specification
+(OpenMP 4.5 for Fortran, C and C++)  has over 300 pages.
+
+We also see the evolution of language support in OpenMP in
+Figure~\ref{omppcount}.  Prior to version 2.5 of the specification released in
+2005, an OpenMP specification was specialized to a particular language.   This
+made writing the text of the specification much easier, but given that most of
+the people working on the Fortran specifications also worked on the C/C++
+specifications, we could not run the two language committees in parallel.  This
+led to long delays between updated specifications such as the almost 4 year
+delay between OpenMP 1.0 for C/C++ and OpenMP 2.0 for C/C++.  The process of
+merging the two languages into a single specification was a much larger
+undertaking than any of us expected at the time and required us to go back and
+recast the core abstractions behind OpenMP much more carefully so they would
+apply across languages.  The resulting OpenMP version 2.5 specification took
+three years to create.
+
+OpenMP is no longer a simple API the full breadth of which can be learned in
+less than a day.  Features were added to address non-uniform memory
+architectures, more complex concurrency control, irregular algorithms,
+accelerators, and much more.   Specification do not grow due to a lack of
+discipline by the designers.  They grow as users demand new features and
+hardware changes.  In that light, an almost seven-fold increase in size over the
+course of almost 20 years is not surprising.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=3.4in]{pics/opcounts.png}
+  \caption{OpenMP specification release dates, page counts and language bindings.}
+  \label{omppcount}
+\end{figure}
+
 

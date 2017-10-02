@@ -58,32 +58,32 @@
 \newbox\sf@box
 \newenvironment{SubFloat}[2][]%
 {\def\sf@one{#1}%
-\def\sf@two{#2}%
-\setbox\sf@box\hbox
-\bgroup}%
+  \def\sf@two{#2}%
+  \setbox\sf@box\hbox
+  \bgroup}%
 { \egroup
-\ifx\@empty\sf@two\@empty\relax
-\def\sf@two{\@empty}
-\fi
-\ifx\@empty\sf@one\@empty\relax
-\subfloat[\sf@two]{\box\sf@box}%
-\else
-\subfloat[\sf@one][\sf@two]{\box\sf@box}%
-\fi}
+  \ifx\@empty\sf@two\@empty\relax
+  \def\sf@two{\@empty}
+  \fi
+  \ifx\@empty\sf@one\@empty\relax
+  \subfloat[\sf@two]{\box\sf@box}%
+  \else
+  \subfloat[\sf@one][\sf@two]{\box\sf@box}%
+  \fi}
 \makeatother
 
-  % \let\oldthebibliography=\thebibliography
-  % \let\endoldthebibliography=\endthebibliography
-  % \renewenvironment{thebibliography}[1]{%
-    % \begin{oldthebibliography}{#1}%
-      % \setlength{\parskip}{0.75ex}%
-      % \setlength{\itemsep}{0.75ex}%
-  % }%
-  % {%
-    % \end{oldthebibliography}%
-  % }
+% \let\oldthebibliography=\thebibliography
+% \let\endoldthebibliography=\endthebibliography
+% \renewenvironment{thebibliography}[1]{%
+% \begin{oldthebibliography}{#1}%
+% \setlength{\parskip}{0.75ex}%
+% \setlength{\itemsep}{0.75ex}%
+% }%
+% {%
+% \end{oldthebibliography}%
+% }
 
-  \IEEEoverridecommandlockouts
+\IEEEoverridecommandlockouts
 
 \begin{document}
 
@@ -102,15 +102,15 @@
     \noindent{\textcolor{blue}{{\sc BRONIS:} \em #1}}
   \end{framed}
 }
-\newcommand{\barry}[1]{
+\newcommand{\tim}[1]{
   \begin{framed}
-    \noindent{\textcolor{yellow}{{\sc BARRY:} \em #1}}
+    \noindent{\textcolor{yellow}{{\sc TIM:} \em #1}}
   \end{framed}
 }
 
-\newcommand{\wu}[1]{
+\newcommand{\alex}[1]{
   \begin{framed}
-    \noindent{\textcolor{red}{{\sc WU:} \em #1}}
+    \noindent{\textcolor{red}{{\sc ALEX:} \em #1}}
   \end{framed}
 }
 
@@ -130,26 +130,11 @@
 
 
 \author{
-\IEEEauthorblockN{Thomas R. W. Scogland Bronis R. de Supinski}\\
-\IEEEauthorblockA{Center for Applied Scientific Computing, Lawrence Livermore National
-Laboratory, Livermore, CA 94551\\
-scogland1@llnl.gov  bronis@llnl.gov}
-
-% \IEEEauthorblockA{Computer Science Department\\
-% Virginia Tech\\
-% Blacksburg, VA 24060 USA\\
-% {tom.scogland,feng}@vt.edu}
-% \IEEEauthorblockA{CASC\\
-% Lawrence Livermore National Laboratory\\
-% Livermore, CA 94551 USA\\
-% {rountree,bronis}@llnl.gov}
+  Alejandro~Duran, Timothy~Mattson, Thomas~R.~W.~Scogland,
+  Bronis~R.~de~Supinski
 }
+
 \pdfinfo{
-   % /Author (Thomas R. W. Scogland, Barry Rountree,
-   % Wu-chun Feng, Bronis R. de Supinski)
-   % /Title  (CoreTSAR: Scheduling for Accelerator-aware Runtimes)
-   % /Subject (CoreTSAR: Scheduling for Accelerator-aware Runtimes)
-   % /Keywords (GPU, Heterogeneous, Parallel programming models, Runtime systems)
 }
 
 \title{
@@ -159,16 +144,13 @@ scogland1@llnl.gov  bronis@llnl.gov}
 \date{}
 \maketitle
 
-% \input{text/abstract}
-
-% TODO
 % \begin{IEEEkeywords}
 % GPGPU; OpenMP; Programming models; Co-scheduling;
 % \end{IEEEkeywords}
 
 % \tom{need to update keywords}
 
-% \input{text/intro}
+\input{text/intro}
 % \input{text/background}
 % \input{text/design}
 % \input{text/implementation}
@@ -178,9 +160,9 @@ scogland1@llnl.gov  bronis@llnl.gov}
 % \input{text/acknowledgments}
 
 \begin{spacing}{0.9}
-\bibliographystyle{abbrv}
-% \balance
-\bibliography{bib/tom-papers}
+  \bibliographystyle{abbrv}
+  % \balance
+  \bibliography{bib/tom-papers}
 \end{spacing}
 
 % BIOS START HERE: currently disabled
