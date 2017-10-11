@@ -1,32 +1,5 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-We have presented the design and implementation of \tsarlong.  We make four
-primary contributions: the design of our scheduler for adaptive scheduling
-across arbitrary numbers of heterogeneous devices; an implementation and
-optimization of that design; the design and evaluation of seven adaptive
-scheduling policies; and our evaluation across four scientific codes, 15
-benchmark kernels and a side-by-side comparison with OmpSs and StarPU. We
-achieve speedups as high as $3.74 \times$ over the best performance that uses
-all cores and a single GPU.  When compared to the original CPU performance on
-8 cores, we achieve as much as $180 \times$ for one benchmark. Further, we
-present an extension to our memory management system that transparently aligns
-matrices during mapping, improving performance in some cases by as much as
-$2.5\times$.  These results clearly demonstrate the benefits to be gained from
-runtime adaptation of task sizes and motivate the addition of a co-scheduling
-interface, such as the \verb#hetero()# clause that we propose, to Accelerated
-OpenMP.
-
-As future work, we will investigate more comprehensive memory association
-support. Starting from the padding transformation we presented here, we will
-pursue more automatic transformations to allow loop body code to reference
-different memory layouts transparently. In the main scheduler, \tsar could
-automatically detect NUMA issues, and the association of GPUs to CPUs and
-manage these automatically for greater performance. Finally, the memory
-management interface that we present is the first step towards a general
-interface for declaring the relationship between tasks and the portions of
-inputs and outputs that they require. Given that information, many schedulers,
-including ours, could automatically manage input and output, providing
-significant value especially as computers become more complex.
 
 
