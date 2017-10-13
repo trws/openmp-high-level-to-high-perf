@@ -2,9 +2,42 @@
 \label{sec:philosophy}
 
 
+\tom{This is a first crack, but covers a point that isn't explicitly brought out
+  in the introduction that is necessary to motivate the use of outlining for
+  example}
+
+The general philosophy of OpenMP is to provide a portable, expressive
+programming model for parallel and concurrent programming that allows a user to
+keep their code as close to the original serial version as possible while still
+achieving performance goals.
 
 \subsection{Serial Equivalence}
 \label{sub:serial_equivalence}
+
+A common misconception about OpenMP is that all OpenMP programs, or at least all
+correct OpenMP programs, provide serial equivalence. In this case serial
+equivalence refers to a guarantee that if a program is compiled with all OpenMP
+constructs completely ignored it will get the same answer as both the original
+serial code and the OpenMP code in parallel.  The truth is significantly more
+complicated.  All OpenMP constructs make it possible to write a program with
+serial equivalence, but it is equally possible to write correct, well-formed
+programs that get different answers not only between sequential and parallel but
+also for any given number of threads.
+
+The reason for this is that OpenMP provides information to the user about how
+their code is being run and attempts to offer high performance by default, and
+serial equivalence if needed.  It is possible to write code that depends on the
+number of threads by using runtime routines to query the thread count and the
+identity of a given thread.  Given code that avoids doing anything based on the
+number of threads, there are still two factors that can create programs without
+serial equivalence: data privatization and execution order.  For example, a
+workshared loop with a reduction clause makes no guarantee of the order in which
+the intermediate products are combined.  This makes it both non-deterministic
+and non-serial-equivalent for any reduction over floating point numbers.
+
+Serial equivalence will continue to be possible in OpenMP for the foreseeable
+future, but as the specification grows and more control is given to the user,
+the number of ways to write code without serial equivalence also grows.
 
 \subsection{Language Independence}
 \label{sub:language_independence}
