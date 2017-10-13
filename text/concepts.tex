@@ -1,8 +1,57 @@
 \section{Concepts and Mechanics}
 \label{sec:concepts}
 
+OpenMP has expanded greatly in scope and complexity since its inception, but
+many of the features build on a common set of core mechanics and basic concepts
+that have changed relatively little over the past twenty years.  This section
+describes two of the most important building blocks of OpenMP, outlining and
+data environments.
+
 \subsection{Outlining}
 \label{sub:outlining}
+
+Outlining is the opposite of inlining, extracting a function from the body
+of another function.  In the context of OpenMP, compiler outlining forms the
+basis of many of the features that allow OpenMP directives to parallelize what
+otherwise looks like normal serial code by automatically creating the functions
+required as targets for the underlying operating system's threading primitives.
+By way of an example, an implementation might convert a parallel region like
+this:
+
+\begin{minted}{c}
+void foo () {
+  int a;
+  #pragma omp parallel
+  {
+    #pragma omp master
+    a = omp_get_num_threads();
+  }
+}
+\end{minted}
+
+Into a new function and a call, or calls, into the runtime like this:
+
+\begin{minted}{c}
+struct foo_parallel_0 {
+  int *a;
+};
+void foo_parallel__(void *data_in) {
+  struct foo_parallel_0 * data = data_in;
+  data->a[0] = omp_get_num_threads();
+}
+void foo () {
+  int a;
+  struct foo_parallel_0 data = {&a};
+  runtime_parallel(foo_parallel__, &data);
+}
+\end{minted}
+
+This example is substantially simplified, but the general transformation for
+outlining any block is to generate a structure that holds all necessary state
+and a function with a signature compatible with the threading abstraction in
+use.  The end result is that the user doesn't have to deal with manually
+creating wrapper functions, or factoring their code out into functions that can
+encapsulate all of their state in arguments, the compiler can do that for them.
 
 \subsection{Data Environments}
 \label{sub:data_environments}
