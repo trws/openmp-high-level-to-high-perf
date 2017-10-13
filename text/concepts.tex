@@ -50,11 +50,39 @@ This example is substantially simplified, but the general transformation for
 outlining any block is to generate a structure that holds all necessary state
 and a function with a signature compatible with the threading abstraction in
 use.  The end result is that the user doesn't have to deal with manually
-creating wrapper functions, or factoring their code out into functions that can
-encapsulate all of their state in arguments, the compiler can do that for them.
+creating wrapper functions and single-use structures to encapsulate their code
+whenever something should be run in parallel or made into a task, the compiler
+can do that for them.
+
+In fact, it could be argued that the main reason that OpenMP was created as a
+compiler extension rather than as a library is to leverage the compiler's
+ability to outline regions of code.  Languages like C++11 and C with the blocks
+extension can cover many of OpenMP's original features, though not some of the
+new ones, by using the lambda or block construct of the language to provide
+outlining at the user level.  We'll revisit this in
+Section~\ref{sec:future_directions} when we discuss some of the ways OpenMP is
+planning to grow in the future.
 
 \subsection{Data Environments}
 \label{sub:data_environments}
 
+While outlining provides the transformation necessary to allow code to remain
+written in a serial style, it doesn't directly address the issue of data privacy
+between threads or tasks.  In OpenMP, every task, or implicit task as used by
+constructs like \texttt{for} and \texttt{simd}, has its own data environment
+that represents its view of memory and of state in the OpenMP runtime.  The
+simplest manifestations of the data environment are providing variables that are
+private to the task, thread, team or construct in general without having to
+re-factor the declaration and initialization of such variables in user code.
 
+A less known but equally important property is the handling of OpenMP
+ICVs~(Internal Control Variables).  Most users know some of the major ICVs by
+their associated environment variables, like \texttt{OMP\_NUM\_THREADS} for
+example, and in fact the behavior of environment variables and data environments
+are relatively similar.  Each new data environment inherits the values or
+behaviors of the enclosing data environment, but is henceforth independent of
+the enclosing environment.  This allows each task to control the behavior of
+OpenMP in its own dynamic scope without changing the behavior of OpenMP
+constructs outside of that scope, giving the user more composability and
+control.
 
