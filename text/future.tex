@@ -7,6 +7,51 @@
 \subsection{Enabling Language-Level Outlining}
 \label{sub:enabling_language_level_outlining}
 
+As we discussed in Section~\ref{sub:outlining} outlining, or extraction of code
+into functions by the compiler, is one of the core mechanisms used by OpenMP.
+Some languages provide a mechanism for this directly in the form of closures or,
+at least in the case of C++, lambdas.  The attraction of these constructs,
+especially for the writers of libraries and parallel frameworks, comes from the
+fact that they allow abstract patterns and behaviors to be implemented once
+while giving users the ability to pass an arbitrarily complex bit of code and
+associated data into the pattern to be executed.  Much of OpenMP could be
+implemented as a library in modern C++, if with less guarantees to the compiler
+and less flexibility given to the implementer, with the use of lambdas.
+Frameworks like Kokkos~\cite{kokkos} and RAJA~\cite{raja} exploit this mechanism
+to create flexible looping constructs, like the one in Figure~\ref{fig:raja},
+that can be compiled for host devices, targets or any number of parallel
+backends depending on compile time arguments.
+
+\begin{figure}
+\begin{minted}{c}
+RAJA::forall<omp_parallel_for>(
+    RAJA::range(0,N),
+    [=](int a) {
+      // loop body
+});
+\end{minted}
+\caption{A C++ lambda supplying the loop body for a parallel for loop}
+\label{fig:raja}
+\end{figure}
+   
+Up to this point OpenMP implementations have commonly used outlining as a way to
+implement the requirements of the specification, but the resulting functions
+have never been exposed to the user as something they could rely on or call.
+Given how useful lambdas have proven however, it may be time to change that.
+We're investigating the possibility of extending the \texttt{task} directive to
+make it possible to create a form of "callable task" or OpenMP closure object
+that would be portable across C, C++ and Fortran.  The advantage of this would
+be a major reduction in the amount of work it takes to make an arbitrary
+callable object with state in C and Fortran, and allow libraries to be
+implemented that would provide functionality like that of Kokkos and RAJA to all
+three languages.  Challenges remain however, particularly how to integrate the
+functionality well into OpenMP and how to make it as efficient as possible at
+runtime.  The simple solution of generating a structure, or derived type, and
+a function pointer is quite portable and would integrate well with established
+libraries, but is unlikely to optimize well for constructs that will be called
+many times.  Despite the challenges, giving users control of outlining could be
+a major step forward for OpenMP.
+
 \subsection{Iterators}
 \label{sub:iterators}
 
