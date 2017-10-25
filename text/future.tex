@@ -10,22 +10,40 @@
 \subsection{Iterators}
 \label{sub:iterators}
 
-One emerging need in the usage of OpenMP is the ability to increase the dynamic nature of OpenMP description (its effects are mostly dynamic). For example, the depend clause allows to express that a task or a target construct has a dependence on different elements of an array. You can express this today by writing multiple clauses which can easily become tedious and error prone if it is more than a few clauses. Furthermore, if the number of clauses would depend on a runtime decision, like if this is a corner cell or an inner cell, it would be imposible to describe in a single directive. The same reasoning could be applied to the map clause in target directives where you would like to discribe different elements of an array.
+One emerging need in the usage of OpenMP is the ability to increase the dynamic
+nature of OpenMP description (its effects are mostly dynamic). For example, the
+depend clause allows to express that a task or a target construct has
+a dependence on different elements of an array. You can express this today by
+writing multiple clauses which can easily become tedious and error prone if it
+is more than a few clauses. Furthermore, if the number of clauses would depend
+on a runtime decision, like if this is a corner cell or an inner cell, it would
+be impossible to describe in a single directive. The same reasoning could be
+applied to the map clause in target directives where you would like to describe
+different elements of an array.
    
-To overcome this lack of expressiveness OpenMP iterators are being developed. They allow to iterate through a range of values and evaluate the same clause multiple times with each value in the range. Furthermore, this range can be described at runtime which allows to vary both the number clauses and their content for a given directive. Figure~\ref{fig:iterators} shows how the iterator feature can be used to express a variable number of dependences on a \emph{task} construct.
+To overcome this lack of expressiveness OpenMP iterators are being developed.
+They allow to iterate through a range of values and evaluate the same clause
+multiple times with each value in the range. Furthermore, this range can be
+described at runtime which allows to vary both the number clauses and their
+content for a given directive. Figure~\ref{fig:iterators} shows how the iterator
+feature can be used to express a variable number of dependences on a \emph{task}
+construct.
 
 \begin{figure}
-\begin{lstlisting}
+\begin{minted}{c}
 void func( double *a, int N )
 {
 #pragma omp task depend(inout:a[i]:i=0:N)
    work(a);
 }
-\end{lstlisting}
+\end{minted}
 \caption{Example of task dependencies with iterators}
 \label{fig:iterators}
 \end{figure}
    
-One could see this as first step towards providing OpenMP with metaprogramming capabilities that would allow were possibly to construct the directives either at compile time or runtime instead of only allowing them to be statically typed by a programmer.
+One could see this as first step towards providing OpenMP with metaprogramming
+capabilities that would allow were possibly to construct the directives either
+at compile time or runtime instead of only allowing them to be statically typed
+by a programmer.
    
 
