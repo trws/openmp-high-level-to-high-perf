@@ -1,52 +1,19 @@
 \begin{abstract}
-    % Start with a two-sentence (at most) description of the big-picture
-    % problem and why we care, and a sentence at the end that emphasizes how
-    % your work is part of the solution.
 
-Heterogeneity continues to increase at all levels of computing, with
-the rise of accelerators such as GPUs, FPGAs, and other co-processors
-into everything from desktops to supercomputers. As a consequence, 
-efficiently managing such disparate resources has become increasingly 
-complex.
-%and critical.
-%How does complexity follow from being critical? A critical task could 
-%correspondingly be a simple task as well.
-%heterogeneity becomes a fact of life, efficiently managing
-%heterogeneous compute resources is becoming a critical task;
-%correspondingly however it increases complexity. 
-CoreTSAR seeks to reduce this complexity by
-adaptively worksharing parallel-loop regions across compute resources
-without requiring any transformation of the code within the loop.  Our
-results show performance improvements of up to 
-%$3\times$ 
-three-fold over a current state-of-the-art heterogeneous task
-scheduler as well as linear performance scaling from a single 
-GPU to four GPUs for many codes.
-%, linear scaling for amenable codes from single target to
-%four GPUs, as well as our 
-In addition, CoreTSAR demonstrates a robust 
-%runtime's 
-ability to adapt to both a variety of workloads and underlying system
-configurations.
-
-% Accelerated OpenMP offers a
-% natural extension to OpenMP parallel loop syntax to offload work onto a variety
-% of accelerators.  OpenMP addresses the
-% potential variance in number of cores or CPUs and scheduling across them for homogeneous systems.
-% Our work seeks to improve the
-% programmability of heterogeneous systems by extending the same flexibility to
-% adjust to different heterogeneous system configurations at runtime to
-% accelerated OpenMP.
-% is capability to
-% scheduling across CPUs and GPUs  providing a runtime system, and
-% proposed programming model extensions, which increase performance portability
-% and performance consistency while retaining a familiar programming model.
-
-% CoreTSAR is our runtime library for scheduling parallel loop regions across
-% compute devices at ru
-
-% CoreTSAR (Core Task Scheduler for Accelerated Runtimes) offers runtime
-% scheduling of parallel loop regions, 
-% implementation of 
+This paper presents an overview of the past, present and future
+of the OpenMP Application Programming Interface (API). While the API
+originally specified a small set of directives that guided shared 
+memory fork-join parallelization of loops and coarse-grain program 
+sections, OpenMP now provides a richer set of directives that capture
+a wide range of parallelization strategies that are not strictly 
+limited to shared memory. As we look towards the future of OpenMP,
+we immediately see further evolution of the support for that range 
+of parallelization strategies and the addition of direct support for 
+debugging and performance analysis tools. Looking beyond the next 
+major release of the specification of the OpenMP API, we expect the 
+specification eventually to include support for more parallelization
+strategies and to embrace closer integration into its Fortran, C and,
+in particular, C++ base languages, which will likely require the 
+API to adopt additional programming abstractions.
 
 \end{abstract}
