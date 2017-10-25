@@ -9,11 +9,37 @@ One of the major developments of version 4.0 of the OpenMP specification was to 
 \subsection{SIMD}
 \label{sub:simd}
 
-Compilers incorporate technology to autovectorize loops for many years but their efectiviness has always been limited in real applications because of the complexity of both determining if a given loop can vectorized (i.e., are the loop iterations free of dependences that prevent vectorization) and what is the most profitable vectorization strategy. Therefore, OpenMP decided to introduce explict vector support to guide the compiler to be able to effectively exploit SIMD parallelism available in many modern architectures.
+Compilers incorporate technology to autovectorize loops for many years but their
+effectiveness has always been limited in real applications because of the
+complexity of both determining if a given loop can vectorized (i.e., are the
+loop iterations free of dependences that prevent vectorization) and what is the
+most profitable vectorization strategy. Therefore, OpenMP decided to introduce
+explicit vector support to guide the compiler to be able to effectively exploit
+SIMD parallelism available in many modern architectures.
 
-The \emph{simd} directive allows to express that a given loop nest has no dependences that would prevent vectorization. The compiler can then proceed to vectorize the loop without having to do any dependence analysis. It is worth noting that the \emph{simd} directive is not a prescriptive directive but rather it is still up to the compiler to decide if it wants to vectorize the loop or not. Different clauses of the directive allow to provide further information and/or restrictions to guide the vectorization.
+The \emph{simd} directive allows to express that a given loop nest has no
+dependences that would prevent vectorization. The compiler can then proceed to
+vectorize the loop without having to do any dependence analysis. It is worth
+noting that the \emph{simd} directive is not a prescriptive directive but rather
+it is still up to the compiler to decide if it wants to vectorize the loop or
+not. Different clauses of the directive allow to provide further information
+and/or restrictions to guide the vectorization.
 
-Loops with functions pose a particular problem to vectorization. In cases where compiler has full visibility it could inline the function to provide full vectorization of the loop. Albeit this is not always the case. Without special treatment the loops could be partially vectorizing by repetedly calling the scalar function for each element of the vector but this would be very inefficient. What is needed is a way to create variants of the function that can process multiple elements of the vector in a single invocation of the function so the function can be used in loops annotated with the \emph{simd} directive. To achieve this the \emph{declare simd} directive was introduced. For functions annotated with the \emph{declare simd} directive the compiler can generate one (or more) variant(s) of the function based on the information provided in the directive. Different clauses allow to control specific details of the variant generation (e.g., the \emph{uninform} clause indicates that a given argument should be an scalar and not a vector). Figure~\ref{fig:simd-example} shows a simple usage example of the OpenMP SIMD directives.
+Loops with functions pose a particular problem to vectorization. In cases where
+compiler has full visibility it could inline the function to provide full
+vectorization of the loop. Albeit this is not always the case. Without special
+treatment the loops could be partially vectorizing by repeatedly calling the
+scalar function for each element of the vector but this would be very
+inefficient. What is needed is a way to create variants of the function that can
+process multiple elements of the vector in a single invocation of the function
+so the function can be used in loops annotated with the \emph{simd} directive.
+To achieve this the \emph{declare simd} directive was introduced. For functions
+annotated with the \emph{declare simd} directive the compiler can generate one
+or more variants of the function based on the information provided in the
+directive. Different clauses allow to control specific details of the variant
+generation (e.g., the \emph{uniform} clause indicates that a given argument
+should be an scalar and not a vector). Figure~\ref{fig:simd-example} shows a
+simple usage example of the OpenMP SIMD directives.
 
 \begin{figure}
 \begin{lstlisting}
