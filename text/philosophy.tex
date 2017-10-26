@@ -2,9 +2,7 @@
 \label{sec:philosophy}
 
 
-\tom{This is a first crack, but covers a point that isn't explicitly brought out
-  in the introduction that is necessary to motivate the use of outlining for
-  example}
+\tom{Bronis, Tim, please look this part over especially}
 
 The general philosophy of OpenMP is to provide a portable, expressive
 programming model for parallel and concurrent programming that allows a user to
@@ -42,8 +40,32 @@ the number of ways to write code without serial equivalence also grows.
 \subsection{Language Independence}
 \label{sub:language_independence}
 
+Though OpenMP began with separate specifications for C and Fortran, the decision
+was made early on to merge the two into a single document and push both base
+languages forward together.  This draws to one of the core philosophies, and
+arguably core strengths, of OpenMP as a model which is its portability and
+compatibility across C, C++ and Fortran.  For scientific codebases, especially
+those with long lived legacy code, this can be a significant advantage.  
+
+\tom{this is too short, ideas on how to expand?}
+
 \subsection{Relationship to the Base Language}
 \label{sub:relationship_to_the_base_language}
 
+OpenMP, by itself, is not a language.  It provides an API for expressing
+parallelism and concurrency in a portable way across three independent
+languages, with the goal of providing the same experience and easy
+interoperability between all three.  Because of this it relies heavily on each
+base language to define the behavior of a given construct within each thread of
+execution or block of code.  The relationship with the base languages has
+changed somewhat over time however.  Before the release of C11 and C++11, C and
+C++ themselves had no well-defined concept of a data race, or of threading in
+general.  In fact, the ISO C99 standard~\cite{c99} does not contain the word
+"thread" at all, and contains the word "race" only as part of the word "brace."
+As a result, OpenMP has to provide all threading and memory model semantics for
+a program written using OpenMP constructs in the context of a C99 program.  With
+the advent of integrated threading models, acquire and release memory models and
+more built-in parallel concepts OpenMP is now in a position of providing its own
+semantics in the context of those models and integrating with them.
 
 
