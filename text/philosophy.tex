@@ -1,13 +1,15 @@
 \section{Philosophy}
 \label{sec:philosophy}
 
-
-\tom{Bronis, Tim, please look this part over especially}
-
 The general philosophy of OpenMP is to provide a portable, expressive
-programming model for parallel and concurrent programming that allows a user to
-keep their code as close to the original serial version as possible while still
-achieving performance goals.
+programming model for parallel and concurrent programming that allows 
+user code to remain as close to the original serial version as 
+possible while still achieving performance goals. This philosophy reflects
+the original goals of the initial group who created the OpenMP API. However,
+like the specification, the philosophy of OpenMP has evolved as the scope
+of the types of parallelization that it supports has expanded. This section
+discusses some basic aspects of the current philosophy of OpenMP and how 
+that philosophy is likely to motivate further extensions to the API.
 
 \subsection{Serial Equivalence}
 \label{sub:serial_equivalence}
