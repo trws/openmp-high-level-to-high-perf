@@ -93,8 +93,10 @@ the target region.
 \begin{figure}
 \begin{minted}{c}
 
-#pragma omp target distribute parallel for \
-            map(to: in_arr[0:N]) map(from: out_arr[0:N])
+#pragma omp target teams distribute \
+            parallel for            \
+            map(to: in_arr[0:N])    \
+            map(from: out_arr[0:N])
 for(int i=0; i < N; ++i)
   out_arr[i] = in_arr[i] * in_arr[i];
 \end{minted}

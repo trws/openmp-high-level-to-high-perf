@@ -16,8 +16,10 @@ basis of many of the features that allow OpenMP directives to parallelize what
 otherwise looks like normal serial code by automatically creating the functions
 required as targets for the underlying operating system's threading primitives.
 By way of an example, an implementation might convert a parallel region like
-this:
+the one in Figure~\ref{fig:outline-before} into a new function and a call, or
+calls, into the runtime as in Figure~\ref{fig:outline-after}.
 
+\begin{figure}
 \begin{minted}{c}
 void foo () {
   int a;
@@ -28,9 +30,11 @@ void foo () {
   }
 }
 \end{minted}
+\caption{A function using OpenMP before outlining is applied}
+\label{fig:outline-before}
+\end{figure}
 
-Into a new function and a call, or calls, into the runtime like this:
-
+\begin{figure}
 \begin{minted}{c}
 struct foo_parallel_0 {
   int *a;
@@ -45,6 +49,9 @@ void foo () {
   runtime_parallel(foo_parallel__, &data);
 }
 \end{minted}
+\caption{After outlining is applied}
+\label{fig:outline-after}
+\end{figure}
 
 This example is substantially simplified, but the general transformation for
 outlining any block is to generate a structure that holds all necessary state

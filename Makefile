@@ -16,7 +16,7 @@ code_files = $(wildcard snippets/*.c snippets/*.py)
 BIBTEX=bibtex -min-crossrefs=9000 
 # If we have rubber use it; if not try to emulate it
 header.pdf: $(tex_files) $(bib_files) $(pdf_files) $(tikz_files) $(code_files) style/IEEEtran.cls
-	pdflatex -shell-escape header | tee latex.out ; \
+	pdflatex -synctex=1 -shell-escape header | tee latex.out ; \
 	if grep -q '^LaTeX Warning: Citation.*undefined' latex.out; then \
 		${BIBTEX} header; \
 		touch .rebuild; \
@@ -25,7 +25,7 @@ header.pdf: $(tex_files) $(bib_files) $(pdf_files) $(tikz_files) $(code_files) s
 		-n "`grep -e '^LaTeX Warning:.*Rerun' -e 'natbib.*Rerun' latex.out`" ]; do \
 		rm -f .rebuild; \
 		${BIBTEX} header; \
-		pdflatex -shell-escape header | tee latex.out; \
+		pdflatex -synctex=1 -shell-escape header | tee latex.out; \
 	done ; \
 	rm latex.out ; \
 

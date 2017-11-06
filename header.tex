@@ -37,10 +37,12 @@
 % \mfalse
 \mtrue
 \ifm
-\usepackage{style/minted}
-% \usemintedstyle{friendly}
-\usemintedstyle{bw}
+\usepackage{minted}
+\usemintedstyle{friendly}
+% \usemintedstyle{bw}
 \fi
+
+\setminted{frame=single}
 
 \lstset{language=c}
 \lstset{basicstyle=\scriptsize\ttfamily}
@@ -158,6 +160,7 @@ The Ongoing Evolution of OpenMP
 \input{text/philosophy}
 \input{text/concepts}
 \input{text/extensions}
+\input{text/in_progress}
 \input{text/future}
 \input{text/conclusions}
 % \input{text/acknowledgments}
