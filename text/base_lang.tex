@@ -1,17 +1,26 @@
-\subsection{Language Independence}
-\label{sub:language_independence}
+\subsection{Relationship to Base Languages}
+\label{sub:relationship_to_base_languages}
 
-Though OpenMP began with separate specifications for C and Fortran, the decision
-was made early on to merge the two into a single document and push both base
-languages forward together.  This draws to one of the core philosophies, and
-arguably core strengths, of OpenMP as a model which is its portability and
-compatibility across C, C++ and Fortran.  For scientific codebases, especially
-those with long lived legacy code, this can be a significant advantage.  
+Although OpenMP began with separate specifications for C/C++ and 
+Fortran, as we discussed in Section~\ref{sec:evolve}, OpenMP 2.5 
+merged them into a single document. Although that choice was
+partly due to the pragmatic reduction in effort to move the base 
+languages forward together, the original goal of a consistent API 
+across the base languages, which remains a key part of OpenMP's 
+guiding philosophy, was the most important reason. This language 
+independence is one of OpenMP's core strengths since OpenMP has 
+greater portability and generality, not only across the C, C++ 
+and Fortran base languages but also in its design as a result. 
 
-\tom{this is too short, ideas on how to expand?}
+%% BRONIS: My solution is to merge the two sections since
+%% BRONIS: language independence is just one aspect of the
+%% BRONIS: relationship to the base language
+%% \tom{this is too short, ideas on how to expand?}
 
-\subsection{Relationship to the Base Language}
-\label{sub:relationship_to_the_base_language}
+%% BRONIS: Still need to rework the following paragraph
+%% BRONIS: Need to introduce the concept of directives
+%% BRONIS: being Turing complete and that OpenMP can bridge
+%% BRONIS: differences across the languages
 
 OpenMP, by itself, is not a language.  It provides an API for expressing
 parallelism and concurrency in a portable way across three independent
