@@ -10,26 +10,53 @@ functions that allow a program to depend on the number of threads or the
 thread number (or ID) that executed a region. Thus, trivial programs could
 fail to exhibit serial equivalence. Today, many more opportunities exist
 to write OpenMP programs that do not provide serial equivalence. 
+%% BRONIS:Could include the trivial example here
 
-%% BRONIS: STOPPED EDITING HERE
-%% BRONIS: NEED TO PROVIDE MORE COMPLETE DISCUSSION OF PHILOSOPHY
-%% BRONIS: SHOULD PROVIDE ACTUAL EXAMPLES IN (PSEUDO) CODE
+%% BRONIS: Tom, you mentioned data privatization in the text that I
+%% BRONIS: deleted. Do you have an interesting example in mind?
 
-All OpenMP constructs make it possible to write a program with
-serial equivalence, but it is equally possible to write correct, well-formed
-programs that get different answers not only between sequential and parallel but
-also for any given number of threads.
-The reason for this is that OpenMP provides information to the user about how
-their code is being run and attempts to offer high performance by default, and
-serial equivalence if needed.  Given code that avoids doing anything based on 
-the number of threads, there are still two factors that can create programs 
-without serial equivalence: data privatization and execution order.  For 
-example, a
-workshared loop with a reduction clause makes no guarantee of the order in which
-the intermediate products are combined.  This makes it both non-deterministic
-and non-serial-equivalent for any reduction over floating point numbers.
+As OpenMP has evolved, the opportunities to write programs that do not
+exhibit serial equivalence have increased. OpenMP support for tasking 
+provides numerous opportunities. Figure~\ref{fig:trivial_task} provides
+a simple tasking program in which the serial version has an infinite loop
+while the parallel version will complete quickly, assuming that the parallel
+region uses two or more threads and different threads execute the two tasks.
 
-Serial equivalence will continue to be possible in OpenMP for the foreseeable
-future, but as the specification grows and more control is given to the user,
-the number of ways to write code without serial equivalence also grows.
+\begin{figure}
+\begin{minted}{c}
+int a = 0;
+#pragma omp parallel
+{
+  #pragma omp single 
+  {
+    int b = 0;
+    #pragma task
+    while (b == 0) {
+      #pragma atomic read seq_cst
+      b = a;
+    }
+    #pragma task
+    {
+      #pragma atomic update seq_cst
+      a++;
+    }
+  }
+}
+\end{minted}
+\caption{Trivial Tasking Program}
+\label{fig:trivial_task}
+\end{figure}
+
+%% BRONIS: Can we provide another exmple, say that uses device constructs?
+
+In general, serial equivalence requires the program or runtime to limit
+the possible execution orders. As OpenMP has grown to support more parallel 
+programming patterns, the range of execution orders has as well, which 
+implies either more opportunities to escheew serial equivalence or more
+limitations on the range of execution orders. Since such limitations would 
+also create performance limitations, OpenMP (or any parallel programming 
+system) tries to avoid them unless the programmer requires them. Thus, the 
+philosophy of OpenMP remains to provide constructs that simplify the 
+enforcement of serial equivalence when desired but that has evolved not 
+to limit parallelism -- and by extension -- performance unnecessarily.
 
