@@ -1,127 +1,13 @@
-\section{Recent Extensions}
+\section{Recent OpenMP Extensions}
 \label{sec:recent_extensions}
 
-One of the major developments of version 4.0 of the OpenMP specification was to
-enable OpenMP to exploit all parallelism available in modern supercomputers. On
-the one hand OpenMP was extended to support accelerators. On the other hand, it
-was extended to support SIMD vector parallelism available in modern processors. 
+OpenMP 4.0 extends the API to cover two additional major forms of
+parallelism: accelerator offload and SIMD vectorization. Almost all
+current systems include hardware that require these parallel programming 
+patterns. This section discusses the related extensions.
 
-\subsection{SIMD}
-\label{sub:simd}
+\input{text/simd}
+\input{text/devices}
 
-Compilers incorporate technology to autovectorize loops for many years but their
-effectiveness has always been limited in real applications because of the
-complexity of both determining if a given loop can vectorized (i.e., are the
-loop iterations free of dependences that prevent vectorization) and what is the
-most profitable vectorization strategy. Therefore, OpenMP decided to introduce
-explicit vector support to guide the compiler to be able to effectively exploit
-SIMD parallelism available in many modern architectures.
-
-The \emph{simd} directive allows to express that a given loop nest has no
-dependences that would prevent vectorization. The compiler can then proceed to
-vectorize the loop without having to do any dependence analysis. It is worth
-noting that the \emph{simd} directive is not a prescriptive directive but rather
-it is still up to the compiler to decide if it wants to vectorize the loop or
-not. Different clauses of the directive allow to provide further information
-and/or restrictions to guide the vectorization.
-
-Loops with functions pose a particular problem to vectorization. In cases where
-compiler has full visibility it could inline the function to provide full
-vectorization of the loop. Albeit this is not always the case. Without special
-treatment the loops could be partially vectorizing by repeatedly calling the
-scalar function for each element of the vector but this would be very
-inefficient. What is needed is a way to create variants of the function that can
-process multiple elements of the vector in a single invocation of the function
-so the function can be used in loops annotated with the \emph{simd} directive.
-To achieve this the \emph{declare simd} directive was introduced. For functions
-annotated with the \emph{declare simd} directive the compiler can generate one
-or more variants of the function based on the information provided in the
-directive. Different clauses allow to control specific details of the variant
-generation (e.g., the \emph{uniform} clause indicates that a given argument
-should be an scalar and not a vector). Figure~\ref{fig:simd-example} shows
-a simple usage example of the OpenMP SIMD directives.
-
-\begin{figure}
-\begin{minted}{c}
-
-#pragma omp declare simd uniform(c)
-double scale(double v, double c)
-{
-     return v * c;
-}
-
-void example()
-{
-    alpha = 0.5;
-#pragma omp simd 
-    for ( i = 0; i < N; i++ )
-        v[i] = scale(v[i],alpha);
-}
-
-\end{minted}
-\caption{Example of SIMD vectorization in OpenMP}
-\label{fig:simd-example}
-\end{figure}
-
-\subsection{Devices}
-\label{sub:devices}
-
-In addition to the pervasiveness of vector units in modern processors, many
-systems are being built with additional co-processors or computational
-accelerators.  These devices include hardware such as Graphics Processing
-Units~(GPUs), Digital Signal Processors~(DSPs), and computation offload
-co-processors like Intel's Xeon Phi.  This type of hardware poses a particular
-challenge for OpenMP because, while the hardware usually resides in the same
-node, the target devices frequently use a different instruction set, programming
-paradigm, and often lack a coherent memory shared with the host processors.
-
-In order to address this challenging, but potentially highly rewarding, group of
-devices OpenMP now has the \emph{target} directive along with a group of
-supporting directives and routines to support a distributed memory offload model
-along with the classic shared-memory model on each device.  Further, since
-many accelerators are built as many-core devices, OpenMP~4.0 also debuted the
-\emph{teams} and \emph{distribute} directives to create leagues of thread teams
-that are each independent from one another for the purposes of synchronization.
-This addition allows each team to retain the functionality of classic OpenMP
-while mapping well to the massively parallel architectures of hardware such as
-GPUs and DSPs.  Figure~\ref{fig:target-loop} presents a simple loop offloaded to
-the default device, dividing work across teams and threads from a single loop.
-The map clauses allow data to be mapped into the data environment of the device
-and, if desired, to update the view of the data on the device or host as part of
-the target region.
-
-\begin{figure}
-\begin{minted}{c}
-
-#pragma omp target teams distribute \
-            parallel for            \
-            map(to: in_arr[0:N])    \
-            map(from: out_arr[0:N])
-for(int i=0; i < N; ++i)
-  out_arr[i] = in_arr[i] * in_arr[i];
-\end{minted}
-\caption{Example of device offload in OpenMP}
-\label{fig:target-loop}
-\end{figure}
-
-
-Much as with \emph{simd}, target regions containing function calls are
-particularly challenging to support.  Unlike with \emph{simd} however, if the
-function call can't be inlined or otherwise made available, the region cannot be
-compiled for the device at all.  The solution to this has been the \emph{declare
-target} directive, which tells the compiler to generate a version of a function
-or static lifetime variable for the target device.  Annotating functions is relatively
-common in models that apply to offload devices, like CUDA and OpenCL for
-example, but since OpenMP has the advantage of a full compiler the specification
-went a step further to ease the use of functions in device code.  For any
-function with a definition in the same translation unit as a call from a target
-region a device version is automatically generated as though it had been marked
-with \emph{declare target}.  If the function is not available, it is treated as
-though it will be made available at link time.  The combination of these
-behaviors has allowed entire large codebases, particularly C++ codebases due to
-the pervasiveness of template code, to offload to devices with OpenMP without
-a single explicit \emph{declare target} directive where other models require
-hundreds or thousands of annotations to compile at all.
-
-
+%% BRONIS: I THINK WE WANT TO COVER 4.0 and 4.5 TASKING EXTENSIONS HERE
 
