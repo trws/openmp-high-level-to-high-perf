@@ -22,7 +22,7 @@ made that OpenACC is descriptive while OpenMP is prescriptive.
 For example, the BLAH construct of OpenACC...
 Alternatively, most OpenMP defaults allow the compiler freedom
 to choose details about how the computation is performed. Even
-the \emph{num\_threads} clause of the \emph{parallel} construct,
+the \texttt{num\_threads} clause of the \texttt{parallel} construct,
 which many believe to be among its most prescriptive mechanisms,
 allows the compiler and runtime to determine if the number of
 threads requested are available. If that many threads are not
@@ -44,7 +44,7 @@ For these reasons, the emerging OpenMP philosophy is to provide
 mechanisms that describe the computation to perform and that
 prescribe as much or as little as the programmer desires about
 how to perform it. As a first step, OpenMP 5.0 will add the 
-\emph{concurrent} construct, which only informs the compiler 
+\texttt{concurrent} construct, which only informs the compiler 
 and runtime that a loop nest is easily parallelized. In the 
 longer run, we are exploring mechanisms that specify that the 
 intent of a clause or a construct is fully descriptive or prescriptive.
