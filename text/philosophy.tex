@@ -1,73 +1,28 @@
-\section{Philosophy}
+\section{The Guiding Philosophy of OpenMP}
 \label{sec:philosophy}
 
-The general philosophy of OpenMP is to provide a portable, expressive
-programming model for parallel and concurrent programming that allows 
-user code to remain as close to the original serial version as 
-possible while still achieving performance goals. This philosophy reflects
-the original goals of the initial group who created the OpenMP API. However,
-like the specification, the philosophy of OpenMP has evolved as the scope
-of the types of parallelization that it supports has expanded. This section
-discusses some basic aspects of the current philosophy of OpenMP and how 
-that philosophy is likely to motivate further extensions to the API.
+The general philosophy of OpenMP reflects the ARB's mission to standardize 
+directive-based multi-language high-level parallelism that is performant, 
+productive and portable. Portability is achieved first and foremost through
+broad adoption and support of the specification. At the highest level, a 
+directive-based approach supports productivity through incremental 
+parallelization and refinement through which user code remains as close 
+to its original serial version as possible while still achieving performance 
+goals. Directives allow the programmer to specify information that a compiler
+would otherwise not be able to determine -- or that might require complex
+and error-prone analysis. Further, OpenMP provides sensible defaults that 
+often result in high performance but also allows low-level control of 
+aspects that the compiler and runtime may not deduce high quality settings.
 
-\subsection{Serial Equivalence}
-\label{sub:serial_equivalence}
+As we discussed in the introduction, OpenMP retains many of its original
+goals, which embodied a general philosophy. However, like the specification, 
+the philosophy of OpenMP has evolved as it has expanded to support a wider
+range of parallel programming patterns. The remainder of this section 
+discusses the evolution of two key aspects of the original philosophy,
+language independence and serial equivalence, as well as the issue of
+descriptiveness versus prescriptiveness, a philosophical issue for 
+programming models that has recently received significant attention.
 
-A common misconception about OpenMP is that all OpenMP programs, or at least all
-correct OpenMP programs, provide serial equivalence. In this case serial
-equivalence refers to a guarantee that if a program is compiled with all OpenMP
-constructs completely ignored it will get the same answer as both the original
-serial code and the OpenMP code in parallel.  The truth is significantly more
-complicated.  All OpenMP constructs make it possible to write a program with
-serial equivalence, but it is equally possible to write correct, well-formed
-programs that get different answers not only between sequential and parallel but
-also for any given number of threads.
-
-The reason for this is that OpenMP provides information to the user about how
-their code is being run and attempts to offer high performance by default, and
-serial equivalence if needed.  It is possible to write code that depends on the
-number of threads by using runtime routines to query the thread count and the
-identity of a given thread.  Given code that avoids doing anything based on the
-number of threads, there are still two factors that can create programs without
-serial equivalence: data privatization and execution order.  For example, a
-workshared loop with a reduction clause makes no guarantee of the order in which
-the intermediate products are combined.  This makes it both non-deterministic
-and non-serial-equivalent for any reduction over floating point numbers.
-
-Serial equivalence will continue to be possible in OpenMP for the foreseeable
-future, but as the specification grows and more control is given to the user,
-the number of ways to write code without serial equivalence also grows.
-
-\subsection{Language Independence}
-\label{sub:language_independence}
-
-Though OpenMP began with separate specifications for C and Fortran, the decision
-was made early on to merge the two into a single document and push both base
-languages forward together.  This draws to one of the core philosophies, and
-arguably core strengths, of OpenMP as a model which is its portability and
-compatibility across C, C++ and Fortran.  For scientific codebases, especially
-those with long lived legacy code, this can be a significant advantage.  
-
-\tom{this is too short, ideas on how to expand?}
-
-\subsection{Relationship to the Base Language}
-\label{sub:relationship_to_the_base_language}
-
-OpenMP, by itself, is not a language.  It provides an API for expressing
-parallelism and concurrency in a portable way across three independent
-languages, with the goal of providing the same experience and easy
-interoperability between all three.  Because of this it relies heavily on each
-base language to define the behavior of a given construct within each thread of
-execution or block of code.  The relationship with the base languages has
-changed somewhat over time however.  Before the release of C11 and C++11, C and
-C++ themselves had no well-defined concept of a data race, or of threading in
-general.  In fact, the ISO C99 standard~\cite{c99} does not contain the word
-"thread" at all, and contains the word "race" only as part of the word "brace."
-As a result, OpenMP has to provide all threading and memory model semantics for
-a program written using OpenMP constructs in the context of a C99 program.  With
-the advent of integrated threading models, acquire and release memory models and
-more built-in parallel concepts OpenMP is now in a position of providing its own
-semantics in the context of those models and integrating with them.
-
-
+\input{text/base_lang}
+\input{text/serial}
+\input{text/descr}

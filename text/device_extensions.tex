@@ -1,0 +1,105 @@
+\subsection{Device Extensions}
+\label{sub:device_extensions}
+
+While OpenMP introduced support to offload computation regions to target 
+devices in version 4.0 and subsequently expanded on the support significantly 
+in 4.5, the space is changing quickly. Thus, we have already adopted several
+extensions and refinements for OpenMP 5.0. We have adopted changes that
+greatly simplyify the use of functions in those regions. Further, a new
+general mechanism to specifiy application-specific requirements will enable 
+straightforward use of unified memory spaces across devices, Nonetheless, 
+we have also adopted a unique deep-copy mechanism that will significantly
+improve usability on systems that do not provide unified memory spaces.
+Importantly, we expect this deep-copy support will often provide performance 
+advantages even on systems that do provide them.
+
+Many offload models, such as CUDA and OpenCL, require function annotations. 
+However, OpenMP 5.0 will ease the use of functions on devices by relaxing 
+its annotation requirements. OpenMP5.0 will eliminate the requirement to 
+annotate function declarations. Essentially, the compiler must assume that 
+a device variant will be available at link time. Also, the compiler must 
+automatically generate a device variant for any function with a definition 
+in the same translation unit as a call from a \texttt{target} region. 
+Essentially, the definition implicitly includes the \texttt{declare target} 
+annotation. Because these changes significantly improve usability, many 
+compilers have already implemented them and they have allowed entire large 
+codebases (particularly in C++ due to the pervasiveness of templates) to 
+offload to devices using OpenMP without a single explicit \texttt{declare 
+target} directive; other models require hundreds or thousands of annotations 
+to compile them at all.
+
+In order to assume coherent memory between the host and a target device, 
+the user must assert to the compiler that their code requires that support.
+Given this assertion, if the code is run on device without that support, 
+it may exhibit unspecified behavior (i.e., the code is broken). Overall,
+these assertions represent a contract between the appication and the 
+compiler, which represents a general mechanism for which unified memory
+spaces are just one instance. Thus, OpenMP 5.0 will a new \texttt{requires} 
+directive that allows OpenMP to specify a set of rules for a given 
+requirement and users to specify that their code accepts those rules for
+it to be correct. This directive supports the definition of subsets of 
+the OpenMP specification; the first subset will support systems that do 
+not require memory to be mapped explicitly into a data environment for 
+target devices. Effectively, the user can assume shared memory between
+the host and the devices. For example, the code in Figure~\ref{fig:unified} 
+is only valid for systems with a unified view of memory. It is non-conforming 
+in OpenMP up to 4.5 but will be correct on systems that meet the requirement.
+Importantly, the \texttt{requires} directive applies to an entire translation
+unit, which offers usability benefits similar to the implicit 
+\texttt{declare target} annotations.
+
+\begin{figure}
+\begin{minted}{c}
+#pragma omp requires \
+        unified_shared_memory
+struct list {
+  void *data;
+  struct list *next;
+};
+
+void foo() {
+  struct list *l = make_linked_list();
+#pragma omp target
+  {
+    struct list *cur;
+    while(cur) {
+      do_something_with_data(cur->data);
+      cur = cur->next;
+    }
+  }
+}
+\end{minted}
+\caption{How to \texttt{require} a Unified Memory Space}
+\label{fig:unified}
+\end{figure}
+
+The deep-copy support in OpenMP 5.0 will simplify the use of complex data
+structures like the linked list in Figure~\ref{fig:unified} on systems that 
+do not provide coherent unified memory. OpenMP 4.5 requries that the user map 
+each individual piece of the structure and then assign pointers, to those 
+pieces within the data structure on the device either with explicit 
+assignments or with further mapping actions. The user often must repeat this 
+verbose, complex and error prone code sequence every time an instance of the 
+data structure is needed on the device. Instead, \texttt{declare mapper}
+directive in OpenMP 5.0 will allow the user to describe how to map a variable 
+of that data strucutre and all of its children or associated data. The user
+can then use this definition in a \texttt{map} clause whenever an instance 
+of the data structure is needed on the device. Overall, the descriptions in
+the \texttt{declare mapper} directive are simpler than the OpenMP 4.5
+mechanism and eliminate the repetition. 
+%% BRONIS: We need to provide the code example for mappers also
+%% Figure~\ref{fig:mapper} shows the corresponding example
+
+We plan to refine the deep-copy mechanism further. Specifically, we will 
+provide a mechanism that can replace any phase of the mapping process with 
+user-defined expressions or functions written in the base language. This 
+mechanism, which will provide equivalent functionality to data  serialization 
+and deserialization for transmission over a network,  will support mapping 
+of arbitrary, complex data structures. Further, it will enable data-dependent 
+data transformations that support highly efficient kernel computations. We
+are working to include this functionality in OpenMP 5.0 although we may
+have to defer its specification for OpenMP 5.1.
+
+
+
+

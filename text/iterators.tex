@@ -1,0 +1,41 @@
+\subsection{Iterators}
+\label{sub:iterators}
+
+Many OpenMP clauses accept lists of parameters. In OpenMP 4.5 or earlier, 
+while many OpenMP clauses accept expressions, the expressions (but not 
+their values) had to be fully determined at compile time. Thus, the number 
+of elements of the lists for the clauses is static. As a result, for example,
+the \texttt{depend} clause can specify a dependendence on multiple elements
+of an array but the number of elements (or array sections) must be known
+at compile time. This requirement can prevent the expression of some
+algorithms or make their expression more complex.  For example, if a 
+corner cell has fewer dependences than an inner cell then the user may need 
+to modify the base language code to provide separate annotations for the
+different situations. Further, the limitation can require the use of long 
+error-prone lists even when the number of list elements is static. This 
+limitation arises from the lack of general programming constructs in 
+OpenMP directives, which we plan to reduce as we discussed in 
+Section~\ref{sub:relationship_to_base_languages}, 
+
+\begin{figure}
+\begin{minted}{c}
+void func( double *a, int N )
+{
+#pragma omp task depend(inout:a[i]:i=0:N)
+   work(a);
+}
+\end{minted}
+\caption{Iterated Task Dependencies}
+\label{fig:iterators}
+\end{figure}
+
+To overcome this lack of expressiveness, OpenMP will add the concept of  
+iterators. This mechanism can iterate through a range of values. Thus, a
+clause can have a dynamic number of list elements. Figure~\ref{fig:iterators} 
+shows how the iterator feature can expressa \texttt{task} construct with a 
+variable number of dependences. 
+   
+
+
+   
+

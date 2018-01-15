@@ -10,15 +10,6 @@ data environments.
 \subsection{Outlining}
 \label{sub:outlining}
 
-Outlining is the opposite of inlining, extracting a function from the body
-of another function.  In the context of OpenMP, compiler outlining forms the
-basis of many of the features that allow OpenMP directives to parallelize what
-otherwise looks like normal serial code by automatically creating the functions
-required as targets for the underlying operating system's threading primitives.
-By way of an example, an implementation might convert a parallel region like
-the one in Figure~\ref{fig:outline-before} into a new function and a call, or
-calls, into the runtime as in Figure~\ref{fig:outline-after}.
-
 \begin{figure}
 \begin{minted}{c}
 void foo () {
@@ -30,7 +21,7 @@ void foo () {
   }
 }
 \end{minted}
-\caption{A function using OpenMP before outlining is applied}
+\caption{A Function that Uses OpenMP}
 \label{fig:outline-before}
 \end{figure}
 
@@ -49,47 +40,68 @@ void foo () {
   runtime_parallel(foo_parallel__, &data);
 }
 \end{minted}
-\caption{After outlining is applied}
+\caption{After Outlining is Applied}
 \label{fig:outline-after}
 \end{figure}
 
-This example is substantially simplified, but the general transformation for
-outlining any block is to generate a structure that holds all necessary state
-and a function with a signature compatible with the threading abstraction in
-use.  The end result is that the user doesn't have to deal with manually
-creating wrapper functions and single-use structures to encapsulate their code
-whenever something should be run in parallel or made into a task, the compiler
-can do that for them.
+Compiler outlining is the opposite of inlining. The technique extracts a 
+function from the body of another function. The technique forms the basis 
+of the most common implementation of most OpenMP constructs, which transform
+serial code to run in parallel. By automatically creating the 
+functions required as targets for the underlying operating system (OS) 
+threading primitives. For example, an implementation might convert a 
+parallel region like the one in Figure~\ref{fig:outline-before} into a 
+new function and a call, or calls, into the runtime as in 
+Figure~\ref{fig:outline-after}.
 
-In fact, it could be argued that the main reason that OpenMP was created as a
-compiler extension rather than as a library is to leverage the compiler's
-ability to outline regions of code.  Languages like C++11 and C with the blocks
-extension can cover many of OpenMP's original features, though not some of the
-new ones, by using the lambda or block construct of the language to provide
-outlining at the user level.  We'll revisit this in
-Section~\ref{sec:future_directions} when we discuss some of the ways OpenMP is
-planning to grow in the future.
+While our example is simplified, the general transformation to outline any 
+block generates a structure that holds all necessary state and a function 
+with a signature compatible with the threading abstraction in use. Thus, 
+the user need not manually create wrapper functions and single-use structures 
+to encapsulate their code whenever something should be run in parallel or 
+made into a task. Instead, the compiler does the repetitive work and leaves
+the task of locating appropriate granularities of parallelism to the user.
+This technique supports allowing the user to specify something for which the
+compiler analysis is highly complex while allowing the compiler to handle the
+repetitive and error-prone portion of the transformation, which is the most 
+enduring aspect of the philosophy of OpenMP, as stated in 
+Section~\ref{sec:philosophy}, 
+
+Interestingly, C++11, with lambdas, and C, with the blocks extension, now 
+provide outlining mechanisms directly to the user. Thus, these languages
+can cover many original OpenMP features (many of the newer OpenMP features
+woudl require additional extensions). We revisit this technique and its
+relationship to the base languages in Section~\ref{sec:future_directions} 
+when we discuss some of the continuing evolution of OpenMP.
 
 \subsection{Data Environments}
 \label{sub:data_environments}
 
-While outlining provides the transformation necessary to allow code to remain
-written in a serial style, it doesn't directly address the issue of data privacy
-between threads or tasks.  In OpenMP, every task, or implicit task as used by
-constructs like \texttt{for} and \texttt{simd}, has its own data environment
-that represents its view of memory and of state in the OpenMP runtime.  The
-simplest manifestations of the data environment are providing variables that are
-private to the task, thread, team or construct in general without having to
-re-factor the declaration and initialization of such variables in user code.
+While outlining supports parallelization of code written in a serial style, 
+it does not directly address the issue of data sharing between threads or 
+tasks. In OpenMP, every task, including implicit tasks that a loop or 
+device construct creates, has its own data environment that represents its 
+view of memory and of state in the OpenMP runtime. The simplest manifestations
+of the data environment provide variables that are private to the task, 
+thread, team or construct in general without having to re-factor the 
+declaration and initialization of the variables in user code.
 
-A less known but equally important property is the handling of OpenMP
-ICVs~(Internal Control Variables).  Most users know some of the major ICVs by
-their associated environment variables, like \texttt{OMP\_NUM\_THREADS} for
-example, and in fact the behavior of environment variables and data environments
-are relatively similar.  Each new data environment inherits the values or
-behaviors of the enclosing data environment, but is henceforth independent of
-the enclosing environment.  This allows each task to control the behavior of
-OpenMP in its own dynamic scope without changing the behavior of OpenMP
-constructs outside of that scope, giving the user more composability and
-control.
+OpenMP data environments also include ICVs~(Internal Control Variables),
+which are a less familiar but equally important aspect of them. ICVs govern
+the actions of the OpenMP runtime. Most users know some of the major ICVs by 
+their associated environment variables, such as \texttt{OMP\_NUM\_THREADS}, 
+and the behavior of environment variables and data environments are similar. 
+Each new data environment inherits the values or behaviors of the enclosing 
+data environment, but it is otherwise independent of the enclosing environment.
+Thus, each task can control the behavior of OpenMP in its dynamic scope 
+without changing the behavior of OpenMP constructs outside of that scope.
+Thus, the mechanism supports composability and control.
 
+Overall, OpenMP data environments are an essential concept. As OpenMP
+has evolved, the data environment concept has also. For example, with 
+the addition of device constructs, we added the concept of separate 
+data environments for each device. This concept provides richer memory
+environment than the original OpenMP shared memory environment.Specifically,
+distinct device data environments can have copies of the same variable
+that may share storage -- or may not. Thus, the use must use OpenMP 
+constructs to ensure that the potential copies are consistent.

@@ -1,0 +1,68 @@
+\subsection{SIMD}
+\label{sub:simd}
+
+Compilers have included technology to autovectorize loops for many years 
+but its effectiveness has provided limited benefit to real applications 
+because of the complexity of determining if a given loop can vectorized 
+(i.e., are the loop iterations free of dependences that prevent vectorization)
+and, if so, the most profitable vectorization strategy. These limitations
+led almost all major compilers to include implementation-defined 
+vectorization directives. While frequently spelled\texttt{ivdep}, the
+semantics often subtly varied across compilers. Due to the similarity 
+with the original motivation for OpenMP with respect to threading 
+directives, we decided to  include explicit direcctives to exploit 
+SIMD parallelism in OpenMP 4.0.
+
+The \texttt{simd} directive expresses that a given loop nest has no
+dependences that would prevent vectorization. The compiler can then 
+vectorize the loop without performing any dependence analysis. The 
+directive accepts several clauses that provide further information 
+and/or restrictions to guide vectorization. The \texttt{simd} directive 
+is not prescriptive as the compiler may choose not to vectorize the 
+loop (essentially a vector width of one).
+
+Loops with functions pose a particular problem to vectorization. If the 
+compiler has the function definition available then it could inline it 
+to vectorize the loop fully. In practie, the definition is often in a
+different compilation unit. Without special treatment, the compiler can
+still partially vectorize the loops by repeatedly calling the scalar 
+function for each element of the vector. A more efficient solution 
+generates vector variants of the functions that process multiple 
+elements of the vector in a single invocation. The compiler can then
+use these variants in loops annotated with the \texttt{simd} directive.
+
+OpenMP provides the \texttt{declare simd} directive to guide generation
+of vector function variants. The directive accepts several clauses that
+prescribe generation of efficient variants for specific use cases so a
+function may be annotated with multiple \texttt{declare simd} directives.
+Other clauses generally guide generartion of vector variants (e.g., the 
+\texttt{uniform} clause indicates that a given argument should be a 
+scalar and not a vector). The compiler can also generate other variants 
+that may be useful for a specific target architecture. The simple example 
+in Figure~\ref{fig:simd-example} uses the OpenMP SIMD directives.
+
+\begin{figure}
+\begin{minted}{c}
+
+#pragma omp declare simd uniform(c)
+double scale(double v, double c)
+{
+     return v * c;
+}
+
+void example()
+{
+    alpha = 0.5;
+#pragma omp simd 
+    for ( i = 0; i < N; i++ )
+        v[i] = scale(v[i],alpha);
+}
+
+\end{minted}
+\caption{Example of SIMD Vectorization in OpenMP}
+\label{fig:simd-example}
+\end{figure}
+
+%% BRONIS: Can we add some performance results here?
+
+

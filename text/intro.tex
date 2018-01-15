@@ -23,12 +23,12 @@ defined the initial group's goals:
         parallel programs;
   \item To produce specifications based on common practice that 
         could be readily implemented;
-  \item To provide a consistent Fortran, C and C++ APIs to the 
+  \item To provide a consistent API for Fortran, C and C++ to the 
         most reasonable extent possible;
   \item To be lean and mean, i.e., to  be only as large as required 
         to express important control-parallel, shared-memory programs  
         but no larger;
-  \item To support backwards compatibility as it evolved;
+  \item To ensure API versions are backwards compatible;
   \item To support \emph{serial equivalence}, i.e., for correct OpenMP 
         programs to produce the same result whether run serially or in
         parallel, to the greatest possible extent.
@@ -51,9 +51,27 @@ the API to serve the needs of parallel application programmers. The ARB
 retains many of the original goals of the initial group in its mission,
 which is to standardize directive-based multi-language high-level 
 parallelism that is performant, productive and portable. The OpenMP 
-API now ptovides a portable, scalable model that gives parallel 
+API now provides a portable, scalable model that gives parallel 
 programmers a simple and flexible interface for developing parallel 
 applications for platforms ranging from embedded systems and accelerator 
-devices to multicore systems and shared-memory systems.
+devices to multicore systems.
 
-%% BRONIS: Consider adding a roadmap here...
+Reviewing the original goals of OpenMP, we find that all but two have 
+been largely retained. Specifically, OpenMP has evolved to support almost 
+all parallel programming patterns, which necessarily implies a much larger 
+specification than originally envisioned. Further, while serial equivalence
+can still be achieved, that range of patterns necessarily leads to many
+opportunities to deviate from it. Otherwise, the only change to the original
+goals is that the scope of OpenMP has extended beyond shared memory. 
+
+We comprehensive examine the state of OpenMP in anticipation of the imminent 
+release of version 5.0 of the API. We first review of the evolution of OpenMP 
+through version 4.5 (Section~\ref{sec:evolve}). We then provide a more 
+detailed examination of the philosophy that has guided its evolution 
+(Section~\ref{sec:philosophy}). Next, we briefly review the basic concepts 
+and mechanisms that support implementation of the evolving API 
+(Section~\ref{sec:concepts}). We then detail some recent 
+(Section~\ref{sec:recent_extensions}) and impending 
+(Section~\ref{sec:in_progress}) additions to OpenMP. Finally, we discuss
+anticipate some possible directions for its longer term evolution
+(Section~\ref{sec:future_directions}).

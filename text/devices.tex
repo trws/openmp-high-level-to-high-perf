@@ -1,0 +1,58 @@
+\subsection{Devices}
+\label{sub:devices}
+
+In addition to the pervasiveness of vector units in modern processors, many
+systems now include additional co-processors or computationalaccelerators.  
+These devices include hardware such as Graphics Processing Units~(GPUs), 
+Digital Signal Processors~(DSPs), and computation offload co-processors 
+like the Intel Xeon Phi. While these hardware devices usually reside in 
+a single node, they pose a particular challenge for OpenMP because they 
+frequently use a different instruction set and programming paradigm. Further,
+they often do not coherently share memory with the host processors that
+OpenMP originally targeted.
+
+In order to address this challenging, but potentially highly rewarding, 
+group of devices OpenMP now has the \texttt{target} directive along with 
+several supporting directives and routines. These additions support a 
+distributed memory offload model that uses the existing shared-memory 
+model on each device. Since many accelerators are many-core devices, the
+supporting directives include the \texttt{teams} and \texttt{distribute} 
+directives, which create leagues of independent thread teams and share 
+loop iterations among them. Accelerators can execute these thread teams 
+efficiently since synchronization across them is highly restricted while
+all OpenMP functionality (except the device constructs themselves currently)
+may be used within each of the teams. Figure~\ref{fig:target-loop} presents 
+a simple loop offloaded to the default device, dividing work across teams 
+and threads from a single loop. The \texttt{map} clauses map data into the 
+device data environment and, if desired, update the view of the data on the 
+device before execution of the \texttt{target} region or on the host after 
+its execution.
+
+\begin{figure}
+\begin{minted}{c}
+
+#pragma omp target teams distribute \
+            parallel for            \
+            map(to: in_arr[0:N])    \
+            map(from: out_arr[0:N])
+for(int i=0; i < N; ++i)
+  out_arr[i] = in_arr[i] * in_arr[i];
+\end{minted}
+\caption{Example of Device Offload in OpenMP}
+\label{fig:target-loop}
+\end{figure}
+
+
+Similarly to \texttt{simd} regions, \texttt{target} regions that contain 
+function calls are particularly challenging to support.  Unlike with 
+\texttt{simd} regions, however, if the function definition is not 
+available to the compiler then the compiler may not generate any variant
+that can be executed, even inefficiently, on the device. Thus, in OpenMP 4.0
+and 4.5, if any target region calls a function then the user must annotate  
+the function defintion and its declarations with the \texttt{declare target} 
+directive. The directive can also be applied to global variables. The compiler
+then must generate a variant of a function or a static lifetime variable for 
+the target device. 
+
+
+
