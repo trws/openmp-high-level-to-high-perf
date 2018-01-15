@@ -33,7 +33,7 @@ that can be compiled for host devices, targets or any number of parallel
 backends depending on compile time arguments.
 
 \begin{figure}
-\begin{minted}{c}
+\begin{minted}{cpp}
 RAJA::forall<omp_parallel_for>(
     RAJA::range(0,N),
     [=](int a) {
