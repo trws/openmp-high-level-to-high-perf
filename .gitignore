@@ -3,6 +3,13 @@ Rplots.pdf
 header.aux
 header.bbl
 header.blg
+header.fls
 header.log
 header.pdf
 header.pyg
+header.synctex.gz
+header.fdb_latexmk
+
+*~
+*.bak
+
