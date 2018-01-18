@@ -40,4 +40,4 @@ clean:
 	find . 	-name '*.lot' -print  | xargs rm -f; \
 	find . 	-name '*.toc' -print  | xargs rm -f; \
 	find . 	-name '*.pyg' -print  | xargs rm -f; \
-	rm -f header.log header.pdf
+	rm -rf header.log header.pdf _minted-header
