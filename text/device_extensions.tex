@@ -5,8 +5,8 @@ While OpenMP introduced support to offload computation regions to target
 devices in version 4.0 and subsequently expanded on the support significantly 
 in 4.5, the space is changing quickly. Thus, we have already adopted several
 extensions and refinements for OpenMP 5.0. We have adopted changes that
-greatly simplyify the use of functions in those regions. Further, a new
-general mechanism to specifiy application-specific requirements will enable 
+greatly simplify the use of functions in those regions. Further, a new
+general mechanism to specify application-specific requirements will enable 
 straightforward use of unified memory spaces across devices, Nonetheless, 
 we have also adopted a unique deep-copy mechanism that will significantly
 improve usability on systems that do not provide unified memory spaces.
@@ -15,7 +15,7 @@ advantages even on systems that do provide them.
 
 Many offload models, such as CUDA and OpenCL, require function annotations. 
 However, OpenMP 5.0 will ease the use of functions on devices by relaxing 
-its annotation requirements. OpenMP5.0 will eliminate the requirement to 
+its annotation requirements. OpenMP~5.0 will eliminate the requirement to 
 annotate function declarations. Essentially, the compiler must assume that 
 a device variant will be available at link time. Also, the compiler must 
 automatically generate a device variant for any function with a definition 
@@ -32,9 +32,9 @@ In order to assume coherent memory between the host and a target device,
 the user must assert to the compiler that their code requires that support.
 Given this assertion, if the code is run on device without that support, 
 it may exhibit unspecified behavior (i.e., the code is broken). Overall,
-these assertions represent a contract between the appication and the 
+these assertions represent a contract between the application and the 
 compiler, which represents a general mechanism for which unified memory
-spaces are just one instance. Thus, OpenMP 5.0 will a new \texttt{requires} 
+spaces are just one instance. Thus, OpenMP~5.0 will a new \texttt{requires} 
 directive that allows OpenMP to specify a set of rules for a given 
 requirement and users to specify that their code accepts those rules for
 it to be correct. This directive supports the definition of subsets of 
@@ -75,20 +75,48 @@ void foo() {
 
 The deep-copy support in OpenMP 5.0 will simplify the use of complex data
 structures like the linked list in Figure~\ref{fig:unified} on systems that 
-do not provide coherent unified memory. OpenMP 4.5 requries that the user map 
+do not provide coherent unified memory. OpenMP 4.5 requires that the user map 
 each individual piece of the structure and then assign pointers, to those 
 pieces within the data structure on the device either with explicit 
 assignments or with further mapping actions. The user often must repeat this 
 verbose, complex and error prone code sequence every time an instance of the 
 data structure is needed on the device. Instead, \texttt{declare mapper}
 directive in OpenMP 5.0 will allow the user to describe how to map a variable 
-of that data strucutre and all of its children or associated data. The user
+of that data structure and all of its children or associated data. The user
 can then use this definition in a \texttt{map} clause whenever an instance 
 of the data structure is needed on the device. Overall, the descriptions in
 the \texttt{declare mapper} directive are simpler than the OpenMP 4.5
-mechanism and eliminate the repetition. 
-%% BRONIS: We need to provide the code example for mappers also
-%% Figure~\ref{fig:mapper} shows the corresponding example
+mechanism and eliminate the repetition. Figure~\ref{fig:mapper} shows the
+corresponding example
+
+\begin{figure}
+\begin{minted}{cpp}
+class Vec {
+  size_t len;
+  double *data;
+public:
+  // Normal vector constructors and access methods
+  #pragma omp declare mapper(Vec v) \
+    use_by_default \
+    map(v, v.data[0:v.len])
+};
+
+
+void foo() {
+  Vec v1(100), v2(100);
+  fill_vec(v1);
+  #pragma omp target teams distribute parallel for \
+      map(to:v1) /* explicitly map v1, Vec mapper used */
+  for(auto i = 0; i < v1.size(); ++i) { 
+    v2[i] = v1[i]; // implicitly map v2 tofrom, Vec mapper used
+  }
+  // v2[0-100] == v1[0-100]
+}
+\end{minted}
+\caption{Example usage of \texttt{declare mapper} in a C++ class with private
+members}
+\label{fig:mapper}
+\end{figure}
 
 We plan to refine the deep-copy mechanism further. Specifically, we will 
 provide a mechanism that can replace any phase of the mapping process with 
