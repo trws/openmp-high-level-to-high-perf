@@ -4,6 +4,26 @@
 %% BRONIS: We should  cover 4.0 and 4.5 tasking extensions
 %% BRONIS: Specifically: Discuss task dependences, taskgroup and taskloop
 
+%% STEPHEN: Introduce the problem with OpenMP 3.x
+
+Directives to support asynchronous task parallelism were first introduced in OpenMP 3.0, and the initial design rationale for this capability is explained in an article by Ayguad\'{e} et al.~\cite{ayguade2009tpds}.  Along with task generation using the \texttt{task} construct, task synchronization is provided using the \texttt{taskwait} construct and barriers.  The \texttt{taskwait} construct specifies a wait on the completion of child tasks of the current task, and a barrier requires complete execution of all tasks in the current parallel region before any threads in the team are allowed to continue execution beyond the barrier.  In many instances, these simple synchronization mechanisms lack the expressiveness to fully expose all available application parallelism.  OpenMP 4 addresses such limitations with two addtional synchronization mechanisms, task dependences and task groups.
+
+%% STEPHEN: Explain task dependences (with example, space permitting)
+%% STEPHEN: Use example of program with and without dependences, possibly Sergi's
+
+%% STEPHEN: Sergi to provide performance results
+
+%% STEPHEN: Discuss task group (example needed or not?)
+
+Recall that all child tasks of the current task must compete at a \texttt{taskwait} construct.  The \texttt{taskgroup} construct allows the current task to wait on only subset of its child tasks, while other child tasks may continue executing beyond the synchronization point.  Additionally, the current task waits on all descendant tasks of the child tasks in the task group, a behavior may be termed deep synchronization.  Because child tasks of the current task can be excluded from a task group, those tasks could perform long-running background activities that proceed alongside successive computional kernels.
+
+%% STEPHEN: Michael to discuss taskloop (with example, space permitting)
+
+%% STEPHEN: Mention task priorities briefly?
+
+
+
+
 % the subsubsection is just for my orientation and can be removed.
 \subsubsection{Taskloop}
 \label{sec:Taskloop}
