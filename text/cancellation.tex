@@ -1,0 +1,68 @@
+\subsection{Cancellation}
+\label{sec:Cancellation}
+With version 4.0, the OpenMP language introduced the concept of cancellation to allow for ending parallel execution of OpenMP-parallel regions.
+This becomes handy in algorithms that traverse some sort of search space or data structure in parallel, and that should stop as soon as a condition is met or if the search found a hit.
+
+OpenMP defines two directives for programmers to use in the context of cancellation.
+First, the \code{cancellation} construct causes the encountering thread to request stopping execution for a subset of the inner-most \code{parallel}, \code{sections}, \code{for} or \code{do} region or a set of tasks that is defined by the \code{taskgroup} construct (see Section~\ref{sec:Taskgroup}).
+The syntax of the \code{cancellation} construct define this subset through clauses that can be given to the construct.
+
+Once a thread encounters a \code{cancellation} construct, it requests cancellation from the OpenMP implementation and then proceeds to the end of the canceled region.
+For instance, if cancellation for an OpenMP \code{taskgroup} is performed, the encountering thread proceeds to the end of the current task.
+Threads that reach a \code{cancellation point} construct, test if cancellation has been activated and then also proceed to the end of the canceled region.
+For the example of OpenMP tasks, this means that these threads stop executing the current task and proceed to the end of the task region.
+
+\begin{figure}
+\begin{minted}{c}
+binary_tree_t*
+search_tree(binary_tree_t* tree,
+            int value) {
+  binary_tree_t* found = NULL;
+  if (tree) {
+    if (tree->value == value) {
+      found = tree;
+    }
+    else {
+#pragma omp task shared(found)
+      {
+        binary_tree_t* found_left;
+        found_left =
+          search_tree(tree->left,
+                      value);
+        if (found_left) {
+#pragma omp atomic write
+          found = found_left;
+#pragma omp cancel taskgroup
+        }
+      }
+#pragma omp task shared(found)
+      {
+        binary_tree_t* found_right;
+        found_right =
+          search_tree(tree->right,
+                      value);
+        if (found_right) {
+#pragma omp atomic write
+          found = found_right;
+#pragma omp cancel taskgroup
+        }
+      }
+#pragma omp taskwait
+    }
+  }
+  return found;
+}
+\end{minted}
+\caption{Example of cancellation while traversing a binary search tree.\label{fig:Cancellation}}
+\end{figure}
+
+Figure~\ref{fig:Cancellation} shows an example how to apply cancellation to end a search in a binary tree if the search value has been found.
+Ignoring the OpenMP directives, the traversal code is quite simple.
+If the value of the current tree node matches the search value, the recursion aborts and returns the tree node containing the value.
+Otherwise, the code first traverses the left sub-tree and then the right sub-tree.
+
+With OpenMP tasking added, the code traverses the left and right sub-tree in parallel.
+Once one of the generated tasks hits the search value, it stores a pointer to the the corresponding tree node and requests cancellation.
+As queued tasks will be discarded, no new work will be generated and parallel computation will stop.
+Please note, this implementation of the parallel tree search is not guaranteed to find the first tree node that contains the search value.
+

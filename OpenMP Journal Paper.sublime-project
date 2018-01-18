@@ -1,0 +1,39 @@
+{
+	"folders":
+	[
+		{
+            "file_exclude_patterns":
+            [
+                "*.lof",
+                "*.lot",
+                "*.out",
+                "*.fmt",
+                "*.fot",
+                "*.cb",
+                "*.cb2",
+                "*.aux",
+                "*.fdb_latexmk",
+                "*.fls",
+                "*.toc",
+                "*.log",
+                "*.bak",
+                "*.latexmain",
+                "*.synctex.gz",
+                "*.synctex.gz(busy)",
+                "header.pdf",
+            ],
+            "path": "."
+		}
+	],
+    "settings":
+    {
+        "word_wrap": true,
+        "spell_check": true,
+        // "ensure_newline_at_eof_on_save": true,
+        "TEXroot": "header.tex",
+        "builder_settings" :
+        {
+            "options": "-shell-escape"
+        }
+    }
+}

@@ -22,3 +22,34 @@ Recall that all child tasks of the current task must compete at a \texttt{taskwa
 %% STEPHEN: Mention task priorities briefly?
 
 
+
+
+% the subsubsection is just for my orientation and can be removed.
+\subsubsection{Taskloop}
+\label{sec:Taskloop}
+
+Support for task-based loops, or \emph{taskloops} for short, is  an extension that was made in OpenMP 4.5 to ease using the tasking model with loop-based parallelism.
+While it was always possible to manually cut a loop into chunks and assign them to OpenMP tasks, it was a cumbersome and error-prone code transformation process that had to be applied by the programmer.
+The OpenMP~4.0 \code{taskloop} construct provides syntactic sugar to automatically transform a loop into a parallel loop using OpenMP task.
+
+\begin{figure}
+\begin{minted}{c}
+void sapxy_tasks(float* a, float* b,
+                 float s, size_t n)
+{
+  size_t i;
+#pragma omp taskloop simd \
+            num_tasks(NTASKS) \
+            shared(a,b) firstprivate(s)
+  for (i = 0; i < n; i++) {
+    a[i] = a[i] * b[i] * s;
+  }
+}
+\end{minted}
+\caption{Example for using the \code{taskloop} construct.\label{fig:TaskloopExample}}
+\end{figure}
+
+Figure~\ref{fig:TaskloopExample} shows how to apply the \code{taskloop} construct to parallelize a \emph{saxpy} operation.
+The \code{num\_tasks} clause is used to specify how many OpenMP tasks shall be created for the sapxy loop.
+Alternatively, programmers can use the \code{grainsize} clause to inform the OpenMP implementation about the minimal number of loop iterations per task.
+The \code{taskloop} construct is also available as a combined construct to use SIMD instructions for the tasks resulting from the loop.
