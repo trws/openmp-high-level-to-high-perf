@@ -80,14 +80,18 @@ each individual piece of the structure and then assign pointers, to those
 pieces within the data structure on the device either with explicit 
 assignments or with further mapping actions. The user often must repeat this 
 verbose, complex and error prone code sequence every time an instance of the 
-data structure is needed on the device. Instead, \texttt{declare mapper}
+data structure is needed on the device. Instead, the \texttt{declare mapper}
 directive in OpenMP 5.0 will allow the user to describe how to map a variable 
-of that data structure and all of its children or associated data. The user
+of that structure type and all of its children or associated data. The user
 can then use this definition in a \texttt{map} clause whenever an instance 
 of the data structure is needed on the device. Overall, the descriptions in
 the \texttt{declare mapper} directive are simpler than the OpenMP 4.5
-mechanism and eliminate the repetition. Figure~\ref{fig:mapper} shows the
-corresponding example
+mechanism and eliminate the repetition. Figure~\ref{fig:mapper} shows a
+corresponding example of mapping a multi-level data structure with the
+\texttt{declare mapper} directive.  The directive in the \texttt{Vec} class uses
+a normal \texttt{map} clause to describe how to map the data pointed to by the
+pointer member for any given instance of the class.  This version works for any
+target platform, including those that do not support unified memory.
 
 \begin{figure}
 \begin{minted}{cpp}
