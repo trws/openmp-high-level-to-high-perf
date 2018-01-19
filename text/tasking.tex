@@ -9,11 +9,14 @@
 Directives to support asynchronous task parallelism were first introduced in OpenMP 3.0, and the initial design rationale for this capability is explained in an article by Ayguad\'{e} et al.~\cite{ayguade2009tpds}.  Along with task generation using the \texttt{task} construct, task synchronization is provided using the \texttt{taskwait} construct and barriers.  The \texttt{taskwait} construct specifies a wait on the completion of child tasks of the current task, and a barrier requires complete execution of all tasks in the current parallel region before any threads in the team are allowed to continue execution beyond the barrier.  In many instances, these simple synchronization mechanisms lack the expressiveness to fully expose all available application parallelism.  OpenMP 4 addresses such limitations with two additional synchronization mechanisms, task dependences and task groups.
 
 
-
 %% SMATEO: this is a bit ugly, but it's the only way I know to do it :D
 \begin{figure}
-\begin{lrbox}{\mintedbox1}
-\begin{minipage}{0.4\columnwidth}
+
+\newsavebox{\firstExample}
+\newsavebox{\secondExample}
+
+\begin{lrbox}{\firstExample}
+\begin{minipage}{0.45\columnwidth}
 \begin{minted}[fontsize=\small]{c}
 void fun1(int *x) {
 #pragma omp task
@@ -22,14 +25,14 @@ void fun1(int *x) {
 #pragma omp taskwait
 
 #pragma omp task
-    printf("%d\n",*x);
+    print(*x);
 }
 \end{minted}
 \end{minipage}
 \end{lrbox}
 
-\begin{lrbox}{\mintedbox2}
-\begin{minipage}{0.4\columnwidth}
+\begin{lrbox}{\secondExample}
+\begin{minipage}{0.48\columnwidth}
 \begin{minted}[fontsize=\small]{c}
 void fun2(int *x) {
 #pragma omp task \
@@ -38,17 +41,20 @@ void fun2(int *x) {
 
 #pragma omp task \
   depend(in: x[0])
-    printf("%d\n",*x);
+    print(*x);
 }
 \end{minted}
 \end{minipage}
 \end{lrbox}
-\subfloat[][OpenMP 3.0]{\usebox{\mintedbox1}}
+
+
+
+\subfloat[][OpenMP 3.0]{\usebox{\firstExample}}
 ~
 ~
 ~
 ~
-\subfloat[][OpenMP 4.0]{\usebox{\mintedbox2}}
+\subfloat[][OpenMP 4.0]{\usebox{\secondExample}}
 
 \centering{\subfloat{\includegraphics[width=0.5\columnwidth]{pics/intro_tasking_ex1_legend.png}}}
 \addtocounter{subfigure}{-1}
