@@ -9,6 +9,7 @@ header.pdf
 header.pyg
 header.synctex.gz
 header.fdb_latexmk
+_minted-header
 
 *~
 *.bak
