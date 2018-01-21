@@ -2,7 +2,7 @@
 \label{sub:devices}
 
 In addition to the pervasiveness of vector units in modern processors, many
-systems now include additional co-processors or computationalaccelerators.  
+systems now include additional co-processors or computational accelerators.  
 These devices include hardware such as Graphics Processing Units~(GPUs), 
 Digital Signal Processors~(DSPs), and computation offload co-processors 
 like the Intel Xeon Phi. While these hardware devices usually reside in 
@@ -46,7 +46,7 @@ function calls are particularly challenging to support.  Unlike with
 available to the compiler then the compiler may not generate any variant
 that can be executed, even inefficiently, on the device. Thus, in OpenMP 4.0
 and 4.5, if any target region calls a function then the user must annotate  
-the function defintion and its declarations with the \texttt{declare target} 
+the function definition and its declarations with the \texttt{declare target} 
 directive. The directive can also be applied to global variables. The compiler
 then must generate a variant of a function or a static lifetime variable for 
 the target device. 

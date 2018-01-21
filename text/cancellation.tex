@@ -62,7 +62,7 @@ If the value of the current tree node matches the search value, the recursion ab
 Otherwise, the code first traverses the left sub-tree and then the right sub-tree.
 
 With OpenMP tasking added, the code traverses the left and right sub-tree in parallel.
-Once one of the generated tasks hits the search value, it stores a pointer to the the corresponding tree node and requests cancellation.
+Once one of the generated tasks hits the search value, it stores a pointer to the corresponding tree node and requests cancellation.
 As queued tasks will be discarded, no new work will be generated and parallel computation will stop.
 Please note, this implementation of the parallel tree search is not guaranteed to find the first tree node that contains the search value.
 

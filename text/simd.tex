@@ -1,7 +1,7 @@
 \subsection{SIMD}
 \label{sub:simd}
 
-Compilers have included technology to autovectorize loops for many years 
+Compilers have included technology to auto-vectorize loops for many years 
 but its effectiveness has provided limited benefit to real applications 
 because of the complexity of determining if a given loop can vectorized 
 (i.e., are the loop iterations free of dependences that prevent vectorization)
@@ -10,7 +10,7 @@ led almost all major compilers to include implementation-defined
 vectorization directives. While frequently spelled\texttt{ivdep}, the
 semantics often subtly varied across compilers. Due to the similarity 
 with the original motivation for OpenMP with respect to threading 
-directives, we decided to  include explicit direcctives to exploit 
+directives, we decided to  include explicit directives to exploit 
 SIMD parallelism in OpenMP 4.0.
 
 The \texttt{simd} directive expresses that a given loop nest has no
@@ -23,7 +23,7 @@ loop (essentially a vector width of one).
 
 Loops with functions pose a particular problem to vectorization. If the 
 compiler has the function definition available then it could inline it 
-to vectorize the loop fully. In practie, the definition is often in a
+to vectorize the loop fully. In practice, the definition is often in a
 different compilation unit. Without special treatment, the compiler can
 still partially vectorize the loops by repeatedly calling the scalar 
 function for each element of the vector. A more efficient solution 
@@ -35,7 +35,7 @@ OpenMP provides the \texttt{declare simd} directive to guide generation
 of vector function variants. The directive accepts several clauses that
 prescribe generation of efficient variants for specific use cases so a
 function may be annotated with multiple \texttt{declare simd} directives.
-Other clauses generally guide generartion of vector variants (e.g., the 
+Other clauses generally guide generation of vector variants (e.g., the 
 \texttt{uniform} clause indicates that a given argument should be a 
 scalar and not a vector). The compiler can also generate other variants 
 that may be useful for a specific target architecture. The simple example 

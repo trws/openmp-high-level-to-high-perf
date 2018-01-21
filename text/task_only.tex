@@ -10,7 +10,7 @@ to the unintuitive requirement that pure tasking programs in OpenMP
 must first start a \texttt{parallel} region and then must ensure that 
 only one thread executes the code that generates the tasks, for example, 
 by using a \texttt{single} region. While unintuitive, the requirement is
-simple. HOwever, it also can unnecessarily limit parallelism in more
+simple. However, it also can unnecessarily limit parallelism in more
 complex applications since other threads (resources) may be idle and 
 available to execute the tasks.
 
