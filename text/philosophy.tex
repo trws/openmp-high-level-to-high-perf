@@ -3,16 +3,26 @@
 
 The general philosophy of OpenMP reflects the ARB's mission to standardize 
 directive-based multi-language high-level parallelism that is performant, 
-productive and portable. Portability is achieved first and foremost through
+productive, and portable. Portability is achieved first and foremost through
 broad adoption and support of the specification. At the highest level, a 
 directive-based approach supports productivity through incremental 
 parallelization and refinement through which user code remains as close 
 to its original serial version as possible while still achieving performance 
 goals. Directives allow the programmer to specify information that a compiler
 would otherwise not be able to determine -- or that might require complex
-and error-prone analysis. Further, OpenMP provides sensible defaults that 
-often result in high performance but also allows low-level control of 
-aspects that the compiler and runtime may not deduce high quality settings.
+and error-prone analysis. 
+
+\textcolor{red}{
+OpenMP provides sensible defaults that often result in high
+performance but also allows low-level control of aspects for which the compiler
+and runtime may not deduce high-quality settings. Programmers can thus start
+from a very simple usage of OpenMP directives and incrementally increase the
+level of complexity to expose more and more control over the code
+transformations applied and parallel execution to achieve higher performance.
+Despite the (growing) complexity of OpenMP directives, the OpenMP language is
+designed to maintain this core principle of directives building on top of each
+other to support this incremental program evolution.
+}
 
 As we discussed in the introduction, OpenMP retains many of its original
 goals, which embodied a general philosophy. However, like the specification, 
