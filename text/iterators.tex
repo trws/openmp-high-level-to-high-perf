@@ -19,23 +19,16 @@ Section~\ref{sub:relationship_to_base_languages},
 
 \begin{figure}
 \begin{minted}{c}
-void func( double *a, int N )
-{
-#pragma omp task depend(inout:a[i]:i=0:N)
+void func(double * a, size_t n) {
+#pragma omp task depend(inout:a[i]:i=0:n)
    work(a);
 }
 \end{minted}
-\caption{Iterated Task Dependences}
-\label{fig:iterators}
+\caption{Iterated task dependences.\label{fig:iterators}}
 \end{figure}
 
 To overcome this lack of expressiveness, OpenMP will add the concept of  
 iterators. This mechanism can iterate through a range of values. Thus, a
 clause can have a dynamic number of list elements. Figure~\ref{fig:iterators} 
 shows how the iterator feature can express a \texttt{task} construct with a 
-variable number of dependences. 
-   
-
-
-   
-
+variable number of dependences.

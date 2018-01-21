@@ -14,10 +14,10 @@ For the example of OpenMP tasks, this means that these threads stop executing th
 
 \begin{figure}
 \begin{minted}{c}
-binary_tree_t*
-search_tree(binary_tree_t* tree,
+binary_tree_t *
+search_tree(binary_tree_t * tree,
             int value) {
-  binary_tree_t* found = NULL;
+  binary_tree_t * found = NULL;
   if (tree) {
     if (tree->value == value) {
       found = tree;
@@ -25,7 +25,7 @@ search_tree(binary_tree_t* tree,
     else {
 #pragma omp task shared(found)
       {
-        binary_tree_t* found_left;
+        binary_tree_t * found_left;
         found_left =
           search_tree(tree->left,
                       value);
@@ -37,7 +37,7 @@ search_tree(binary_tree_t* tree,
       }
 #pragma omp task shared(found)
       {
-        binary_tree_t* found_right;
+        binary_tree_t * found_right;
         found_right =
           search_tree(tree->right,
                       value);

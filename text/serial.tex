@@ -24,27 +24,28 @@ region uses two or more threads and different threads execute the two tasks.
 
 \begin{figure}
 \begin{minted}{c}
-int a = 0;
-#pragma omp parallel
-{
-  #pragma omp single 
+void example() {
+  int a = 0;
+  #pragma omp parallel
   {
-    int b = 0;
-    #pragma task
-    while (b == 0) {
-      #pragma atomic read seq_cst
-      b = a;
-    }
-    #pragma task
+    #pragma omp single
     {
-      #pragma atomic update seq_cst
-      a++;
+      int b = 0;
+      #pragma task
+      while (b == 0) {
+        #pragma atomic read seq_cst
+        b = a;
+      }
+      #pragma task
+      {
+        #pragma atomic update seq_cst
+        a++;
+      }
     }
   }
 }
 \end{minted}
-\caption{Trivial Tasking Program}
-\label{fig:trivial_task}
+\caption{A trivial program with OpenMP tasking.\label{fig:trivial_task}}
 \end{figure}
 
 %% BRONIS: Can we provide another exmple, say that uses device constructs?

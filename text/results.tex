@@ -15,8 +15,8 @@
 
     \end{tabular}
     }
-    \caption{Test system specifications, all CPUs and GPUs are made by Intel and NVIDIA respectively.}
-    \label{tab:systems}
+    \caption{Test system specifications, all CPUs and GPUs are made by Intel and
+             NVIDIA respectively.\label{tab:systems}}
 \end{table*}
 
 \section{Evaluation}
@@ -134,9 +134,8 @@ GPUs each iteration. We leave optimization of CG to future work.
     \end{tabular}
 }
     \caption{Benchmark characteristics, times in seconds, \\
-             time/pass for static schedule with CPUs and one GPU.}
+             time/pass for static schedule with CPUs and one GPU.\label{tab:bench}}
     % \vspace{-2em}
-    \label{tab:bench}
 \end{table}
 % \begin{figure}[t]
     % \begin{center}
@@ -165,8 +164,7 @@ count combination.
 \begin{figure}[t]
         \includegraphics[width=\columnwidth]{chunks-current-flipped}
         \caption{Performance across chunk sizes for each benchmark with the
-        basic Chunk scheduler}
-	\label{fig:chunk-size}
+        basic Chunk scheduler.\label{fig:chunk-size}}
 \end{figure}
 
 
@@ -186,8 +184,7 @@ scale to more than one; and GPU-averse applications.
 \begin{figure*}[p]
         \includegraphics[width=\textwidth]{current-combined-part}
         \caption{Performance across schedulers and number of GPUs for all
-        benchmarks, normalized to CPU OpenMP across 8 cores.}
-	\label{fig:performance}
+        benchmarks, normalized to CPU OpenMP across 8 cores.\label{fig:performance}}
 \end{figure*}
 
 % \begin{figure*}[t]
@@ -329,8 +326,7 @@ system armor1 with two quad-core Intel Xeon cores and a low power NVIDIA GT
 %\end{figure*}
 \begin{figure}[t]
         \includegraphics[width=\columnwidth]{machines-wrapped}
-        \caption{\tsar speedup across systems}
-	\label{fig:nodes}
+        \caption{\tsar speedup across systems.\label{fig:nodes}}
 \end{figure}
 
 As some of our benchmarks require more memory than the smaller GPUs posses, we
@@ -407,8 +403,7 @@ equivalent feature, though StarPU does.
     \begin{center}
         \includegraphics[width=\columnwidth]{ompss}
     \end{center}
-    \caption{Comparison of \tsar with OmpSs and StarPU.}
-    \label{fig:ompssres}
+    \caption{Comparison of \tsar with OmpSs and StarPU.\label{fig:ompssres}}
 \end{figure}
 
 Figure~\ref{fig:ompssres} presents the speedup results, calculated as speedup

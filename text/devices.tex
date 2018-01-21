@@ -30,18 +30,15 @@ its execution.
 
 \begin{figure}
 \begin{minted}{c}
-
 #pragma omp target teams distribute \
             parallel for            \
-            map(to: in_arr[0:N])    \
-            map(from: out_arr[0:N])
-for(int i=0; i < N; ++i)
+            map(to: in_arr[0:n])    \
+            map(from: out_arr[0:n])
+for(size_t i = 0; i < n; ++i)
   out_arr[i] = in_arr[i] * in_arr[i];
 \end{minted}
-\caption{Example of Device Offload in OpenMP}
-\label{fig:target-loop}
+\caption{Example of device offload in OpenMP.\label{fig:target-loop}}
 \end{figure}
-
 
 Similarly to \texttt{simd} regions, \texttt{target} regions that contain 
 function calls are particularly challenging to support.  Unlike with 

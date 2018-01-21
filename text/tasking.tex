@@ -18,7 +18,7 @@ Directives to support asynchronous task parallelism were first introduced in Ope
 \begin{lrbox}{\firstExample}
 \begin{minipage}{0.45\columnwidth}
 \begin{minted}[fontsize=\small]{c}
-void fun1(int *x) {
+void fun1(int * x) {
 #pragma omp task
     (*x)++;
 
@@ -34,7 +34,7 @@ void fun1(int *x) {
 \begin{lrbox}{\secondExample}
 \begin{minipage}{0.48\columnwidth}
 \begin{minted}[fontsize=\small]{c}
-void fun2(int *x) {
+void fun2(int * x) {
 #pragma omp task \
   depend(inout: x[0])
     (*x)++;
@@ -92,13 +92,11 @@ The OpenMP~4.0 \code{taskloop} construct provides syntactic sugar to automatical
 \begin{figure}
 \begin{minted}{c}
 void sapxy_tasks(float* a, float* b,
-                 float s, size_t n)
-{
-  size_t i;
+                 float s, size_t n) {
 #pragma omp taskloop simd \
             num_tasks(NTASKS) \
             shared(a,b) firstprivate(s)
-  for (i = 0; i < n; i++) {
+  for (size_t i = 0; i < n; i++) {
     a[i] = a[i] * b[i] * s;
   }
 }

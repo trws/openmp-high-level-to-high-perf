@@ -17,15 +17,14 @@ address.
 \begin{figure}
 \begin{minted}{c}
 RAJA::forall<omp_parallel_for>(
-    RAJA::range(0,N),
+    RAJA::range(0, n),
     [=](int a) {
       // loop body
 });
 \end{minted}
-\caption{A \texttt{parallel for} Loop Body in a C++ Lambda}
-\label{fig:raja}
+\caption{A \texttt{parallel for} loop body in a C++ lambda.\label{fig:raja}}
 \end{figure}
-   
+
 While OpenMP must evolve to support mechanisms such as lambdas, Fortran
 users of OpenMP currently cannot exploit the capabilities that we will 
 provide. So far, although many OpenMP implementations use outlining, they 

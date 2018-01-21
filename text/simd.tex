@@ -45,22 +45,18 @@ in Figure~\ref{fig:simd-example} uses the OpenMP SIMD directives.
 \begin{minted}{c}
 
 #pragma omp declare simd uniform(c)
-double scale(double v, double c)
-{
+double scale(double v, double c) {
      return v * c;
 }
 
-void example()
-{
-    alpha = 0.5;
-#pragma omp simd 
-    for ( i = 0; i < N; i++ )
-        v[i] = scale(v[i],alpha);
+void example(double * v, size_t n) {
+    double alpha = 0.5;
+#pragma omp simd
+    for (size_t i = 0; i < n; i++ )
+        v[i] = scale(v[i], alpha);
 }
-
 \end{minted}
-\caption{Example of SIMD Vectorization in OpenMP}
-\label{fig:simd-example}
+\caption{Example of SIMD vectorization in OpenMP.\label{fig:simd-example}}
 \end{figure}
 
 %% BRONIS: Can we add some performance results here?

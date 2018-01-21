@@ -12,7 +12,7 @@ data environments.
 
 \begin{figure}
 \begin{minted}{c}
-void foo () {
+void example() {
   int a;
   #pragma omp parallel
   {
@@ -21,27 +21,27 @@ void foo () {
   }
 }
 \end{minted}
-\caption{A Function that Uses OpenMP}
-\label{fig:outline-before}
+\caption{A function that uses OpenMP.\label{fig:outline-before}}
 \end{figure}
 
 \begin{figure}
 \begin{minted}{c}
 struct foo_parallel_0 {
-  int *a;
+  int * a;
 };
-void foo_parallel__(void *data_in) {
+
+void foo_parallel__(void * data_in) {
   struct foo_parallel_0 * data = data_in;
   data->a[0] = omp_get_num_threads();
 }
+
 void foo () {
   int a;
   struct foo_parallel_0 data = {&a};
   runtime_parallel(foo_parallel__, &data);
 }
 \end{minted}
-\caption{After Outlining is Applied}
-\label{fig:outline-after}
+\caption{After outlining is applied.\label{fig:outline-after}}
 \end{figure}
 
 Compiler outlining is the opposite of inlining. The technique extracts a 
