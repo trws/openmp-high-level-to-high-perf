@@ -21,6 +21,13 @@ provides numerous opportunities. Figure~\ref{fig:trivial_task} provides
 a simple tasking program in which the serial version has an infinite loop
 while the parallel version will complete quickly, assuming that the parallel
 region uses two or more threads and different threads execute the two tasks.
+Figure~\ref{fig:trivial_target} shows a pair of example functions, where
+\texttt{increment} will take and increment a value whether it executes with
+OpenMP or not, \texttt{example} may or may not depending on the platform even
+though it calls \texttt{increment} to do the work.  While this example clearly
+contains a bug, such manipulations of device data lifetimes can cause different
+execution between OpenMP and serial \emph{even when the OpenMP code is also
+serial}.
 
 \begin{figure}
 \begin{minted}{c}
@@ -48,12 +55,26 @@ void example() {
 \caption{A trivial program with OpenMP tasking.\label{fig:trivial_task}}
 \end{figure}
 
-%% BRONIS: Can we provide another exmple, say that uses device constructs?
+\begin{figure}
+\begin{minted}{c}
+void increment(int *p) {
+  #pragma omp target map(tofrom:p[0:1])
+  {
+    *p++;
+  }
+}
+void example() {
+  #pragma omp target data map(to: p[0:1])
+  example1();
+}
+\end{minted}
+\caption{A trivial program with OpenMP target.\label{fig:trivial_target}}
+\end{figure}
 
 In general, serial equivalence requires the program or runtime to limit
 the possible execution orders. As OpenMP has grown to support more parallel 
 programming patterns, the range of execution orders has as well, which 
-implies either more opportunities to escheew serial equivalence or more
+implies either more opportunities to eschew serial equivalence or more
 limitations on the range of execution orders. Since such limitations would 
 also create performance limitations, OpenMP (or any parallel programming 
 system) tries to avoid them unless the programmer requires them. Thus, the 
