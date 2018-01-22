@@ -57,10 +57,10 @@ void example() {
 
 \begin{figure}
 \begin{minted}{c}
-void increment(int *p) {
+void increment(int * p) {
   #pragma omp target map(tofrom:p[0:1])
   {
-    *p++;
+    (*p)++;
   }
 }
 void example() {
