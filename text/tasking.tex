@@ -16,8 +16,10 @@ Directives to support asynchronous task parallelism were first introduced in Ope
 \newsavebox{\secondExample}
 
 \begin{lrbox}{\firstExample}
-\begin{minipage}{0.48\columnwidth}
-\begin{minted}[fontsize=\small]{c}
+%\begin{minipage}{0.48\columnwidth}
+\begin{minipage}{0.45\columnwidth}
+%\begin{minted}[fontsize=\small]{c}
+\begin{minted}{c}
 #pragma omp task
 produce(a);
 #pragma omp task
@@ -25,7 +27,11 @@ produce(b);
 #pragma omp task
 produce(c);
 
-#pragma omp taskwait
+// wait on all
+//    three child
+//    tasks here
+#pragma omp \
+        taskwait
 
 #pragma omp task
 consume(a, b);
@@ -38,8 +44,10 @@ consume(a, c);
 \end{lrbox}
 
 \begin{lrbox}{\secondExample}
-\begin{minipage}{0.48\columnwidth}
-\begin{minted}[fontsize=\small]{c}
+%\begin{minipage}{0.48\columnwidth}
+\begin{minipage}{0.50\columnwidth}
+%\begin{minted}[fontsize=\small]{c}
+\begin{minted}{c}
 #pragma omp task \
     depend(out: a)
 produce(a);
