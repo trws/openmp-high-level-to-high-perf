@@ -16,70 +16,90 @@ Directives to support asynchronous task parallelism were first introduced in Ope
 \newsavebox{\secondExample}
 
 \begin{lrbox}{\firstExample}
+%\begin{minipage}{0.48\columnwidth}
 \begin{minipage}{0.45\columnwidth}
-\begin{minted}[fontsize=\small]{c}
-void fun1(int * x) {
+%\begin{minted}[fontsize=\small]{c}
+\begin{minted}{c}
 #pragma omp task
-    (*x)++;
+produce(a);
+#pragma omp task
+produce(b);
+#pragma omp task
+produce(c);
 
-#pragma omp taskwait
+// wait on all
+//    three child
+//    tasks here
+#pragma omp \
+        taskwait
 
 #pragma omp task
-    print(*x);
-}
+consume(a, b);
+#pragma omp task
+consume(b, c);
+#pragma omp task
+consume(a, c);
 \end{minted}
 \end{minipage}
 \end{lrbox}
 
 \begin{lrbox}{\secondExample}
-\begin{minipage}{0.48\columnwidth}
-\begin{minted}[fontsize=\small]{c}
-void fun2(int * x) {
+%\begin{minipage}{0.48\columnwidth}
+\begin{minipage}{0.50\columnwidth}
+%\begin{minted}[fontsize=\small]{c}
+\begin{minted}{c}
 #pragma omp task \
-  depend(inout: x[0])
-    (*x)++;
+    depend(out: a)
+produce(a);
+#pragma omp task \
+    depend(out: b)
+produce(b);
+#pragma omp task \
+    depend(out: c)
+produce(c);
 
 #pragma omp task \
-  depend(in: x[0])
-    print(*x);
-}
+   depend(in: a, b)
+consume(a, b);
+#pragma omp task \
+   depend(in: b, c)
+consume(b, c);
+#pragma omp task \
+   depend(in: a, c)
+consume(a, c);
 \end{minted}
 \end{minipage}
 \end{lrbox}
 
 
 
-\subfloat[][OpenMP 3.0]{\usebox{\firstExample}}
+\subfloat[][OpenMP 3.0]{\usebox{\firstExample}\label{fig:CodeTaskDeps3.0code}}
 ~
 ~
-~
-~
-\subfloat[][OpenMP 4.0]{\usebox{\secondExample}}
+\subfloat[][OpenMP 4.0]{\usebox{\secondExample}\label{fig:CodeTaskDeps4.0code}}
 
-\centering{\subfloat{\includegraphics[width=0.5\columnwidth]{pics/intro_tasking_ex1_legend.png}}}
+\centering{\subfloat{\includegraphics[width=0.30\columnwidth]{pics/intro_tasking_ex1_legend.png}}}
 \addtocounter{subfigure}{-1}
 
-\subfloat[][]{\includegraphics[width=0.45\columnwidth]{pics/intro_tasking_ex1_omp3.png}}
+\subfloat[][]{\includegraphics[width=0.48\columnwidth]{pics/intro_tasking_ex1_omp3.png}\label{fig:CodeTaskDeps3.0timeline}}
 ~
-\subfloat[][]{\includegraphics[width=0.45\columnwidth]{pics/intro_tasking_ex1_omp4.png}}
-\caption{Example of parallelization using task dependences.\label{fig:CodeTaskDeps}}
+~
+\subfloat[][]{\includegraphics[width=0.48\columnwidth]{pics/intro_tasking_ex1_omp4.png}\label{fig:CodeTaskDeps4.0timeline}}
+\caption{Tasking examples with and without dependences.\label{fig:CodeTaskDeps}}
 \end{figure}
 
 %% STEPHEN: Explain task dependences (with example, space permitting)
-%% STEPHEN: Use example of program with and without dependences, possibly Sergi's
+
+The \texttt{depend} clause was introduced in OpenMP 4.0 to indicate which variables are inputs and outputs of particular tasks, allowing the implementation to derive and resolve the data dependences between the tasks.  Figures~\ref{fig:CodeTaskDeps4.0code}~and~\ref{fig:CodeTaskDeps4.0code} show code for a producer-consumer pattern using tasks in OpenMP~3.0 and OpenMP~4.0, respectively.  The timelines below it illustrate the scheduling of the tasks onto two threads:  The exploitation of fine-grained, data-driven sychronization provided by task dependences, shown in Figure~\ref{fig:CodeTaskDeps4.0timeline}, allows more flexible scheduling compared to the more coarse-grained synchronization using OpenMP~3.0, shown in Figure~\ref{fig:CodeTaskDeps3.0timeline}.
 
 %% STEPHEN: Sergi to provide performance results
 
 %% STEPHEN: Discuss task group (example needed or not?)
 
-Recall that all child tasks of the current task must compete at a \texttt{taskwait} construct.  The \texttt{taskgroup} construct allows the current task to wait on only subset of its child tasks, while other child tasks may continue executing beyond the synchronization point.  Additionally, the current task waits on all descendant tasks of the child tasks in the task group, a behavior may be termed deep synchronization.  Because child tasks of the current task can be excluded from a task group, those tasks could perform long-running background activities that proceed alongside successive computational kernels.
+Recall that all child tasks of the current task must compete at a \texttt{taskwait} construct.  The \texttt{taskgroup} construct allows the current task to wait on only subset of its child tasks, while other child tasks may continue executing beyond the synchronization point.  Additionally, the current task waits on all descendant tasks of the child tasks in the task group, a behavior that may be termed deep synchronization.  Because child tasks of the current task can be excluded from a task group, those tasks could perform long-running background activities that proceed alongside successive computational kernels.
 
-%% STEPHEN: Michael to discuss taskloop (with example, space permitting)
 
 %% STEPHEN: Mention task priorities briefly?
-
-
-
 
 % Michael: the subsubsection is just for my orientation and can be removed.
 %\subsubsection{Taskloop}
