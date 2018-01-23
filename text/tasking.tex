@@ -16,17 +16,23 @@ Directives to support asynchronous task parallelism were first introduced in Ope
 \newsavebox{\secondExample}
 
 \begin{lrbox}{\firstExample}
-\begin{minipage}{0.45\columnwidth}
+\begin{minipage}{0.48\columnwidth}
 \begin{minted}[fontsize=\small]{c}
-void fun1(int * x) {
 #pragma omp task
-    (*x)++;
+produce(a);
+#pragma omp task
+produce(b);
+#pragma omp task
+produce(c);
 
 #pragma omp taskwait
 
 #pragma omp task
-    print(*x);
-}
+consume(a, b);
+#pragma omp task
+produce(b, c);
+#pragma omp task
+produce(a, c);
 \end{minted}
 \end{minipage}
 \end{lrbox}
@@ -34,15 +40,25 @@ void fun1(int * x) {
 \begin{lrbox}{\secondExample}
 \begin{minipage}{0.48\columnwidth}
 \begin{minted}[fontsize=\small]{c}
-void fun2(int * x) {
 #pragma omp task \
-  depend(inout: x[0])
-    (*x)++;
+    depend(out: a)
+produce(a);
+#pragma omp task \
+    depend(out: b)
+produce(b);
+#pragma omp task \
+    depend(out: c)
+produce(c);
 
 #pragma omp task \
-  depend(in: x[0])
-    print(*x);
-}
+   depend(in: a, b)
+consume(a, b);
+#pragma omp task \
+   depend(in: b, c)
+produce(b, c);
+#pragma omp task \
+   depend(in: a, c)
+produce(a, c);
 \end{minted}
 \end{minipage}
 \end{lrbox}
@@ -52,16 +68,15 @@ void fun2(int * x) {
 \subfloat[][OpenMP 3.0]{\usebox{\firstExample}}
 ~
 ~
-~
-~
 \subfloat[][OpenMP 4.0]{\usebox{\secondExample}}
 
-\centering{\subfloat{\includegraphics[width=0.5\columnwidth]{pics/intro_tasking_ex1_legend.png}}}
+\centering{\subfloat{\includegraphics[width=0.30\columnwidth]{pics/intro_tasking_ex1_legend.png}}}
 \addtocounter{subfigure}{-1}
 
-\subfloat[][]{\includegraphics[width=0.45\columnwidth]{pics/intro_tasking_ex1_omp3.png}}
+\subfloat[][]{\includegraphics[width=0.48\columnwidth]{pics/intro_tasking_ex1_omp3.png}}
 ~
-\subfloat[][]{\includegraphics[width=0.45\columnwidth]{pics/intro_tasking_ex1_omp4.png}}
+~
+\subfloat[][]{\includegraphics[width=0.48\columnwidth]{pics/intro_tasking_ex1_omp4.png}}
 \caption{Example of parallelization using task dependences.\label{fig:CodeTaskDeps}}
 \end{figure}
 
