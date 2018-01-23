@@ -30,9 +30,9 @@ produce(c);
 #pragma omp task
 consume(a, b);
 #pragma omp task
-produce(b, c);
+consume(b, c);
 #pragma omp task
-produce(a, c);
+consume(a, c);
 \end{minted}
 \end{minipage}
 \end{lrbox}
@@ -55,10 +55,10 @@ produce(c);
 consume(a, b);
 #pragma omp task \
    depend(in: b, c)
-produce(b, c);
+consume(b, c);
 #pragma omp task \
    depend(in: a, c)
-produce(a, c);
+consume(a, c);
 \end{minted}
 \end{minipage}
 \end{lrbox}
@@ -77,7 +77,7 @@ produce(a, c);
 ~
 ~
 \subfloat[][]{\includegraphics[width=0.48\columnwidth]{pics/intro_tasking_ex1_omp4.png}}
-\caption{Example of parallelization using task dependences.\label{fig:CodeTaskDeps}}
+\caption{Tasking examples with and without dependences.\label{fig:CodeTaskDeps}}
 \end{figure}
 
 %% STEPHEN: Explain task dependences (with example, space permitting)
