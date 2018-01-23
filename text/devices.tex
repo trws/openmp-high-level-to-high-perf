@@ -40,6 +40,18 @@ for(size_t i = 0; i < n; ++i)
 \caption{Example of device offload in OpenMP.\label{fig:target-loop}}
 \end{figure}
 
+In addition to the using the \texttt{map} clause on the \texttt{target}
+directive, there are a number of other options for device data management. 
+These options include directives for the definition of structured target data 
+regions and also for unstructured transfers or updates between host and 
+device data. The \texttt{nowait} clause can be used on the \texttt{target}
+directive and on these device data management directives to enable the 
+implemenentation to treat them as asynchronous tasks.  This feature allows 
+overlap of host and device computation and data transfers.  It can also be 
+combined with task dependences, described in Section~\ref{sub:tasking},  
+for data-driven asynchronous execution. Device memory runtime routines are 
+also provided.
+
 Similarly to \texttt{simd} regions, \texttt{target} regions that contain 
 function calls are particularly challenging to support.  Unlike with 
 \texttt{simd} regions, however, if the function definition is not 
@@ -50,6 +62,4 @@ the function definition and its declarations with the \texttt{declare target}
 directive. The directive can also be applied to global variables. The compiler
 then must generate a variant of a function or a static lifetime variable for 
 the target device. 
-
-
 
