@@ -5,3 +5,35 @@
 %% BRONIS: We should focus mostly on task affinity although we can also
 %% BRONIS: cover/mention task reductions and mutexinout dependences
 
+OpenMP 5.0 continues the evolution of the OpenMP tasking model toward 
+addressing more use cases.  Task reductions, task affinity, and 
+additional forms of task dependences provide enhanced performance and 
+ease of use.  Prior to OpenMP 5.0, lack of support for explicit task 
+reductions required users to implement their own reductions by 
+collecting and later combining per-thread partial values, passing 
+partial values through the tree of tasks, or using locks or atomics 
+with resulting serialization of those operations.  The 
+\texttt{task\_reduction} clause allows a reduction over a task group, 
+and the \texttt{reduction} clause is extended to include reduction 
+over taskloops.  The \texttt{in\_reduction} clause appears on tasks that 
+participate in the reduction, which can include target tasks that 
+offload computation or transfer data to devices.
+
+Support for task dependences is extended in two new ways.  First, use 
+of iterators is allowed in the \texttt{depend} clause, as described 
+previously in Section~\ref{sub:iterators}. Second, a new dependence type 
+allows a set of tasks to commute with repect to one another with the 
+constraints that their executions are mutually exclusive and that 
+they satisfy any dependences with respect to tasks outside the set.
+
+Like task dependences, task affinity indicates the data used by a task. 
+Unlike task dependences task affinity is a hint providing the runtime 
+library additional information to guide the placement of tasks onto 
+threads, rather than enforcing an ordering among the threads that use 
+the data.  The runtime library may schedule tasks using the same data 
+onto the same thread or onto threads executing on cores in the same 
+NUMA  domain.  An advanced runtime library may also use the information 
+to tune work stealing for better locality. Use of the \texttt{affinity} 
+clause introduced for this purpose may be extended to other constructs 
+in future versions of OpenMP.
+
