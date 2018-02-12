@@ -93,6 +93,7 @@ consume(a, c);
 The \texttt{depend} clause was introduced in OpenMP 4.0 to indicate which variables are inputs and outputs of particular tasks, allowing the implementation to derive and resolve the data dependences between the tasks.  Figures~\ref{fig:CodeTaskDeps4.0code}~and~\ref{fig:CodeTaskDeps4.0code} show code for a producer-consumer pattern using tasks in OpenMP~3.0 and OpenMP~4.0, respectively.  The timelines below it illustrate the scheduling of the tasks onto two threads:  The exploitation of fine-grained, data-driven sychronization provided by task dependences, shown in Figure~\ref{fig:CodeTaskDeps4.0timeline}, allows more flexible scheduling compared to the more coarse-grained synchronization using OpenMP~3.0, shown in Figure~\ref{fig:CodeTaskDeps3.0timeline}.
 
 %% STEPHEN: Sergi to provide performance results
+\includegraphics[width=0.45\textwidth]{pics/task-perf-results.png}
 
 %% STEPHEN: Discuss task group (example needed or not?)
 
