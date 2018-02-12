@@ -10,8 +10,8 @@ set boxwidth 0.9
 set xtics format ""
 set grid ytics
 
-set title "OpenMP Performance Comparison" font "Helvetica, 18"
-set label "(ICC 18.1, 2 x Intel Xeon Platinum 8160 CPU (24 cores))" at screen 0.5, 0.875 center
+set title "Performance Comparison: OpenMP Loops, Tasks, and Dependences" font "Helvetica, 17"
+set label "2 X 24-core Intel Xeon Platinum 8160 CPU (48 cores total)" at screen 0.5, 0.875 center font "Helvetica, 14"
 set ylabel "Speedup against serial version" offset 1.5,0,0 font "Helvetica,14"
 set xlabel "Benchmark" offset 0,+0.5,0 font "Helvetica,14"
 plot "openmp_perf_comparison.data" using 2:xtic(1) title "omp-for" linecolor rgb red, \
