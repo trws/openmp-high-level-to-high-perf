@@ -90,10 +90,14 @@ consume(a, c);
 
 %% STEPHEN: Explain task dependences (with example, space permitting)
 
-The \texttt{depend} clause was introduced in OpenMP 4.0 to indicate which variables are inputs and outputs of particular tasks, allowing the implementation to derive and resolve the data dependences between the tasks.  Figures~\ref{fig:CodeTaskDeps4.0code}~and~\ref{fig:CodeTaskDeps4.0code} show code for a producer-consumer pattern using tasks in OpenMP~3.0 and OpenMP~4.0, respectively.  The timelines below it illustrate the scheduling of the tasks onto two threads:  The exploitation of fine-grained, data-driven sychronization provided by task dependences, shown in Figure~\ref{fig:CodeTaskDeps4.0timeline}, allows more flexible scheduling compared to the more coarse-grained synchronization using OpenMP~3.0, shown in Figure~\ref{fig:CodeTaskDeps3.0timeline}.
+The \texttt{depend} clause was introduced in OpenMP 4.0 to indicate which variables are inputs and outputs of particular tasks, allowing the implementation to derive and resolve the data dependences between the tasks.  Figures~\ref{fig:CodeTaskDeps4.0code}~and~\ref{fig:CodeTaskDeps4.0code} show code for a producer-consumer pattern using tasks in OpenMP~3.0 and OpenMP~4.0, respectively.  The timelines below it illustrate the scheduling of the tasks onto two threads:  The exploitation of fine-grained, data-driven sychronization provided by task dependences, shown in Figure~\ref{fig:CodeTaskDeps4.0timeline}, allows more flexible scheduling compared to the more coarse-grained synchronization using OpenMP~3.0, shown in Figure~\ref{fig:CodeTaskDeps3.0timeline}.  A comparison of parallel speedup acheived on a 48-core system is shown in Figure~\ref{fig:dep-speedup}.  A basic task-based implementation of Cholesky edges out a highly optimized version using the loop construct, and using dependences improves performance more significantly.  For Gauss-Seidel, a basic task-based implementation far underperforms a version baased on the loop construct, but a version using task dependences peforms the best.
 
 %% STEPHEN: Sergi to provide performance results
+\begin{figure}
 \includegraphics[width=0.45\textwidth]{pics/task-perf-results.png}
+\caption{A performance evaluation of task depedendences.}
+\label{fig:dep-speedup}
+\end{figure}
 
 %% STEPHEN: Discuss task group (example needed or not?)
 
