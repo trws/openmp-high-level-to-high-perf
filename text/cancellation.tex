@@ -4,7 +4,7 @@ With version 4.0, the OpenMP language introduced the concept of cancellation to 
 This becomes handy in algorithms that traverse some sort of search space or data structure in parallel, and that should stop as soon as a condition is met or if the search found a hit.
 
 OpenMP defines two directives for programmers to use in the context of cancellation.
-First, the \code{cancellation} construct causes the encountering thread to request stopping execution for a subset of the inner-most \code{parallel}, \code{sections}, \code{for} or \code{do} region or a set of tasks that is defined by the \code{taskgroup} construct (see Section~\ref{sec:Taskgroup}).
+First, the \code{cancellation} construct causes the encountering thread to request stopping execution for a subset of the inner-most \code{parallel}, \code{sections}, \code{for} or \code{do} region or a set of tasks that is defined by the \code{taskgroup} construct (see Section~\ref{sub:tasking}).  
 The syntax of the \code{cancellation} construct define this subset through clauses that can be given to the construct.
 
 Once a thread encounters a \code{cancellation} construct, it requests cancellation from the OpenMP implementation and then proceeds to the end of the canceled region.
