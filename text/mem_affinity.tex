@@ -17,25 +17,25 @@ in Figure~\ref{fig:atsar-gemm} to partition a logical range across threads in a
 thereof.
 
 \begin{figure}
-\begin{minted}{c}
-int i, i_start=0, i_end=i_size, j, j_start=0, j_end=j_size;
-float A[k_size][j_size], B[i_size][k_size];
-float *C = (float*)malloc(sizeof(C[0])*i_size*j_size);
-int   C_pitch = j_size;
+  \begin{minted}[fontsize=\footnotesize]{c}
+int i, is=0, ie=isz, j, js=0, je=jsz;
+float A[ksz][jsz], B[isz][ksz];
+float *C = (float*)malloc(sizeof(C[0])*isz*jsz);
+int   C_pitch = jsz;
 
 #pragma omp parallel devices(socket)
- partition(adaptive: j_id=j_start; j_id<j_end; ++j_id)         \
- map(to: A[0:k_size][:,partition=j_id], B[0:i_size][0:k_size]) \
- map(tofrom: C[0:i_size,pitch=C_pitch][:,partition=j_id])
+ part(adaptive: j_id=js; j_id<je; ++j_id)        \
+ map(to: A[0:ksz][:,part=j_id], B[0:isz][0:ksz]) \
+ map(tofrom: C[0:isz,pitch=C_pitch][:,part=j_id])
 { // Partitioned parallel region
 #pragma omp target teams distribute parallel for  \
   devices(all) partition(dynamic)                 \
   map(to: A[:][:], B[:,partition=i][:])           \
   map(tofrom: C[:,partition=i][:])
-  for (int i = i_start; i < i_end; ++i) { // Partitioned loop
-    for (int j = j_start; j < j_end; ++j) {
+  for (int i = is; i < ie; ++i) {//Partitioned loop
+    for (int j = js; j < je; ++j) {
       float sum = 0.0;
-      for (int k = 0; k < k_size; ++k) {
+      for (int k = 0; k < ksz; ++k) {
         sum += A[k][j] * B[i][k];
       }
       C[i * C_pitch + j] = sum;
