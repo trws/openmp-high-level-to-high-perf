@@ -44,19 +44,20 @@ void foo () {
 \caption{After outlining is applied.\label{fig:outline-after}}
 \end{figure}
 
-Compiler outlining is the opposite of inlining. The technique extracts a 
-function from the body of another function. The technique forms the basis 
-of the most common implementation of most OpenMP constructs, which transform
-serial code to run in parallel. By automatically creating the 
-functions required as targets for the underlying operating system (OS) 
-threading primitives. For example, an implementation might convert a 
-parallel region like the one in Figure~\ref{fig:outline-before} into a 
-new function and a call, or calls, into the runtime as in 
+Compiler outlining is the opposite of inlining. The technique extracts a
+function from the body of another function. While conceptually simple, outlining
+forms the basis of the most common implementation of most OpenMP constructs that
+transform serial code to run in parallel. Specifically it allows the compiler to
+automatically create the functions required as targets for underlying
+threading primitives. For example, an implementation might
+convert a parallel region like the one in Figure~\ref{fig:outline-before} into a
+new function and a call, or calls, into the runtime as in
 Figure~\ref{fig:outline-after}.
 
 While our example is simplified, the general transformation to outline any 
-block generates a structure that holds all necessary state and a function 
-with a signature compatible with the threading abstraction in use. Thus, 
+block generates a function 
+with a signature compatible with the threading abstraction in use and captures
+any necessary state in a structure or similarly compatible data type. Thus, 
 the user need not manually create wrapper functions and single-use structures 
 to encapsulate their code whenever something should be run in parallel or 
 made into a task. Instead, the compiler does the repetitive work and leaves
