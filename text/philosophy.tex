@@ -1,35 +1,33 @@
 \section{The Guiding Philosophy of OpenMP}
 \label{sec:philosophy}
 
-The general philosophy of OpenMP reflects the ARB's mission to standardize 
+OpenMP's general philosophy reflects the ARB's mission to standardize 
 directive-based multi-language high-level parallelism that is performant, 
 productive, and portable. Portability is achieved first and foremost through
-broad adoption and support of the specification. At the highest level, a 
-directive-based approach supports productivity through incremental 
-parallelization and refinement through which user code remains as close 
-to its original serial version as possible while still achieving performance 
-goals. Directives allow the programmer to specify information that a compiler
-would otherwise not be able to determine -- or that might require complex
-and error-prone analysis. 
+broad adoption and support. At the highest level, a directive-based approach 
+supports productivity through incremental parallelization and refinement 
+through which user code remains as close to its original serial version as 
+possible while still achieving performance goals. Directives allow the 
+programmer to specify information that a compiler would otherwise not be 
+able to determine -- or that might require complex and error-prone analysis. 
 
-OpenMP provides sensible defaults that often result in high
-performance but also allows low-level control of aspects for which the compiler
-and runtime may not deduce high-quality settings. Programmers can thus start
-from a very simple usage of OpenMP directives and incrementally increase the
-level of complexity to expose more and more control over the code
-transformations applied and parallel execution to achieve higher performance.
-Despite the (growing) complexity of OpenMP directives, the OpenMP language is
-designed to maintain this core principle of directives building on top of each
-other to support this incremental program evolution.
+OpenMP provides sensible defaults that often result in high performance but 
+also allows low-level control of aspects for which the compiler and runtime 
+may not deduce high-quality settings. Programmers can thus start from simple
+usage of OpenMP directives and incrementally increase the level of complexity 
+to expose more and more control over the code transformations applied and 
+parallel execution to achieve higher performance. Despite the (growing) 
+complexity of OpenMP directives, the OpenMP language is designed to maintain 
+this core principle of directives building on top of each other to support 
+this incremental program evolution.
 
-As we discussed in the introduction, OpenMP retains many of its original
-goals, which embodied a general philosophy. However, like the specification, 
-the philosophy of OpenMP has evolved as it has expanded to support a wider
-range of parallel programming patterns. The remainder of this section 
-discusses the evolution of two key aspects of the original philosophy,
-language independence and serial equivalence, as well as the issue of
-descriptiveness versus prescriptiveness, a philosophical issue for 
-programming models that has recently received significant attention.
+As we discussed earlier, OpenMP retains many of its original goals, which 
+embodied a general philosophy. However, like the specification, this philosophy
+has evolved as OpenMP has expanded to support a wider range of parallel 
+programming patterns. This section discusses the evolution of two key aspects 
+of the original philosophy, language independence and serial equivalence, as 
+well as the issue of descriptiveness versus prescriptiveness, a philosophical 
+issue for programming models that has recently received significant attention.
 
 \input{text/base_lang}
 \input{text/serial}
