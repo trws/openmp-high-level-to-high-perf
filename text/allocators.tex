@@ -1,63 +1,44 @@
 \subsection{Allocators and Hierarchical Memory}
 \label{sub:allocators_and_hierarchical_memory}
 
-%% Christian: this is meant as a first draft for review by Alex
-
-Modern computing devices employ a memory hierarchy, which is expected to become
-even deeper in future systems, following the introduction of high-bandwidth
-memory, non-volatile RAM and other developments.
-Each of these technologies has a different programming interface and distinct
-performance characteristics.
-Addressing these differences becomes increasingly critical for all types of
-computing where performance is tied to memory bandwidth: as the fastest
-resources typically have limited capacity, placement choices have direct
-influence on application performance.
-To enable programmability of these technologies and portability across
-platforms, OpenMP~5.0 includes a consistent and portable interface for memory
-placement in tiered memory systems.
-
-%% Christian to Alex: I used the term "memory space" by intent over an
-%% alternative such as "memory resource", because we might want to come
-%% back using that term. What do you think?
+Memory hierarchies are expected to become deeper in future systems with the
+use of technologies such as high-bandwidth memory and non-volatile RAM. Each 
+of these technologies has a different programming interface and distinct
+performance characteristics. Programming mechanisms must address these 
+differences and support intelligent data placement since the fastest resources
+typically have limited capacity. To enable programmability of these 
+technologies and portability across platforms, OpenMP~5.0 will include a 
+consistent and portable interface for placement within the memory hierarchy.
 
 The term \emph{memory space} refers to a memory resource available in the
-system, at the time the OpenMP program is executed.
-Memory spaces differ in their characteristics, for instance in bandwidth or
-capacity.
-An \emph{allocator} is an object that allocates and frees memory from a suitable
-memory space and OpenMP offers a set of pre-defined memory allocators.
-The use of one of these allocators expresses the intent to allocate memory from
-a memory space with a certain property.
+system when the OpenMP program is executed. Memory spaces differ in their 
+characteristics, for instance in bandwidth or capacity. An \emph{allocator} 
+is an object that allocates and frees memory from a suitable memory space 
+and OpenMP will provide intuitive pre-defined memory allocators. The use of 
+an allocator expresses the intent to allocate memory from a memory space 
+with certain properties. For example, the pre-defined memory allocators 
+can select a memory space with large capacity, high bandwidth or low latency, 
+or memory local to a particular thread or thread team.
+
+OpenMP 5.0 will include the \texttt{omp\_alloc} and \texttt{omp\_free} 
+routines as direct replacements for \texttt{malloc} and \texttt{free} from 
+the standard library. The \texttt{allocate} clause will directly specify 
+the use of an allocator for any construct that accepts data sharing clauses.
+It enables the allocation of \texttt{private} variables in a particular memory
+space. Figure~\ref{fig:allocators} illustrates the use of the pre-defined
+\texttt{omp\_high\_bw\_mem\_alloc} allocator to allocate memory from the 
+high bandwidth memory space.
 
 \begin{figure}
 \begin{minted}{c}
-double * A = (double * ) omp_alloc(N,
-             &omp_high_bw_mem_alloc)
+double * A = (double * ) 
+    omp_alloc(N, &omp_high_bw_mem_alloc);
 \end{minted}
 \caption{High-Bandwidth Memory Allocation\label{fig:allocators}}
 \end{figure}
 
-The pre-defined memory allocators support the selection of a memory space with
-large capacity, high bandwidth or low latency, or memory local to a particular
-thread or thread team, for example.
-The concept of memory allocation in OpenMP is supported by the
-\texttt{omp\_alloc} and \texttt{omp\_free} routines, which are offered as direct
-replacements for \texttt{malloc} and \texttt{free} from the standard library.
-An allocator can also be used within the \texttt{allocate} clause that is
-supported on all constructs that accept data sharing clauses.
-It enables the allocation of \texttt{private} variables in a particular memory
-kind.
-Figure~\ref{fig:allocators} illustrates the use of the pre-defined
-\texttt{omp\_high\_bw\_mem\_alloc} allocator to allocate memory from the memory
-kind with high bandwidth.
-
-%% Christian to Alex: do you think we need to provide the full list here?
-%% I have no idea about how much space we have, but Bronis said something
-%% like one page for all additions, this is why I did not include it yet.
-
-In order to support the outfitting of existing programs and to enable the quick
-adoption of a program to a specific memory configuration, the pre-defined
-allocators are of type \texttt{omp\_allocator\_t}.
-This way they can be passed by argument and once the memory allocation has
-been changed to using the OpenMP API function, these code places do not have to
-be modified again just for using a different memory kind.
+In order to support rapid adaption of existing programs to a specific memory 
+configuration, the pre-defined allocators are of type 
+\texttt{omp\_allocator\_t}. Thus, they can be passed by argument and once 
+memory allocation uses the OpenMP API function, these code places do not 
+have to be modified again just to use a different memory space.
