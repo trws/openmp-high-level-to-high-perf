@@ -30,7 +30,7 @@ struct foo_parallel_0 {
   int * a;
 };
 
-void foo_parallel__(void * data_in) {
+void foo_parallel_(void * data_in) {
   struct foo_parallel_0 * data = data_in;
   data->a[0] = omp_get_num_threads();
 }
@@ -38,7 +38,7 @@ void foo_parallel__(void * data_in) {
 void foo () {
   int a;
   struct foo_parallel_0 data = {&a};
-  runtime_parallel(foo_parallel__, &data);
+  runtime_parallel(foo_parallel_, &data);
 }
 \end{minted}
 \caption{After Outlining\label{fig:outline-after}}
