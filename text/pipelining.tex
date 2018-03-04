@@ -25,10 +25,10 @@ to pull in the entire range of the data first.
 
 \begin{figure}
 \begin{minted}{c}
-void func(double *A, double *An,
+void func(double * A, double * An,
           int nx, int ny, int nz) {
-#pragma omp target teams distribute\
-  pipeline(static)\
+#pragma omp target teams distribute    \
+  pipeline(static)                     \
   map(pipeline,to:A[k-1:3][0:ny][0:nx])\
   map(pipeline,from:An[k:1][0:ny][0:nx])
 for(k=1;k<nz;k++) {
@@ -48,8 +48,7 @@ for(k=1;k<nz;k++) {
 }
 }
 \end{minted}
-\caption{Example of a possible syntax for pipelining a stencil
-loop.\label{fig:pipeline}}
+\caption{Pipelining Example\label{fig:pipeline}}
 \end{figure}
 
 A working prototype of a runtime for this functionality has been
@@ -68,7 +67,6 @@ allows much larger problems to be run than would otherwise fit on the device.
 \begin{figure}
   \centering
   \includegraphics[width=0.5\textwidth]{pics/pipelining-perf}
-  \caption{Speedup of pipelined or buffered data transfers across
-  kernels.\label{fig:pipeline-perf}}
+  \caption{Pipelined Versus Buffered Data Transfers\label{fig:pipeline-perf}}
 \end{figure}
 
