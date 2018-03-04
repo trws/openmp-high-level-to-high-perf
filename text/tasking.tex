@@ -1,15 +1,19 @@
 \subsection{Tasking Extensions}
 \label{sub:tasking}
 
-%% BRONIS: We should  cover 4.0 and 4.5 tasking extensions
-%% BRONIS: Specifically: Discuss task dependences, taskgroup and taskloop
+OpenMP 3.0 introduced directives to support asynchronous task parallelism. 
+Those extensions were carefully designed to support that unstructured 
+parallel pattern while co-existing with OpenMP's existing support for 
+structured parallelism~\cite{ayguade2009tpds}. They generate tasks with the 
+\texttt{task} construct and synchonize them through the \texttt{taskwait} 
+construct and barriers. The \texttt{taskwait} construct specifies a wait 
+on the completion of child tasks of the current task, and a barrier requires 
+complete execution of all tasks in the current parallel region before any 
+threads in the team can continue execution beyond the barrier. However, these 
+simple synchronization mechanisms often lack the expressiveness to expose all 
+available parallelism. OpenMP~4.0 addressed these limitations with two 
+additional synchronization mechanisms: task dependences and task groups.
 
-%% STEPHEN: Introduce the problem with OpenMP 3.x
-
-Directives to support asynchronous task parallelism were first introduced in OpenMP 3.0, and the initial design rationale for this capability is explained in an article by Ayguad\'{e} et al.~\cite{ayguade2009tpds}.  Along with task generation using the \texttt{task} construct, task synchronization is provided using the \texttt{taskwait} construct and barriers.  The \texttt{taskwait} construct specifies a wait on the completion of child tasks of the current task, and a barrier requires complete execution of all tasks in the current parallel region before any threads in the team are allowed to continue execution beyond the barrier.  In many instances, these simple synchronization mechanisms lack the expressiveness to fully expose all available application parallelism.  OpenMP 4 addresses such limitations with two additional synchronization mechanisms, task dependences and task groups.
-
-
-%% SMATEO: this is a bit ugly, but it's the only way I know to do it :D
 \begin{figure}
 
 \newsavebox{\firstExample}
@@ -85,34 +89,51 @@ consume(a, c);
 ~
 ~
 \subfloat[][]{\includegraphics[width=0.48\columnwidth]{pics/intro_tasking_ex1_omp4.png}\label{fig:CodeTaskDeps4.0timeline}}
-\caption{Tasking examples with and without dependences.\label{fig:CodeTaskDeps}}
+\caption{Tasking Examples without and with Dependences\label{fig:CodeTaskDeps}}
 \end{figure}
 
-%% STEPHEN: Explain task dependences (with example, space permitting)
+The \texttt{depend} clause in OpenMP~4.0 uses variable names to indicate
+dependences between tasks (i.e., restrictions on their execution order).
+Figures~\ref{fig:CodeTaskDeps3.0code}~and~\ref{fig:CodeTaskDeps4.0code} show 
+task code for a producer-consumer pattern in OpenMP~3.0 and~4.0.  The 
+time lines below it illustrate the scheduling of the tasks on two threads.
+Task dependences support fine-grained, data-driven sychronization, as 
+Figure~\ref{fig:CodeTaskDeps4.0timeline} shows, which allows more flexible 
+scheduling compared to the coarse-grained synchronization that OpenMP~3.0
+supported (Figure~\ref{fig:CodeTaskDeps3.0timeline}). 
+Figure~\ref{fig:dep-speedup} compares the parallel speedup achieved on a 
+48-core system. A basic task-based implementation of Cholesky edges out a 
+highly optimized version using the loop construct, and using dependences 
+improves performance more significantly. For Gauss-Seidel, a basic task-based 
+implementation far underperforms a version based on the loop construct, 
+but a version that uses task dependences provides the best peformance.
 
-The \texttt{depend} clause was introduced in OpenMP 4.0 to indicate which variables are inputs and outputs of particular tasks, allowing the implementation to derive and resolve the data dependences between the tasks.  Figures~\ref{fig:CodeTaskDeps4.0code}~and~\ref{fig:CodeTaskDeps4.0code} show code for a producer-consumer pattern using tasks in OpenMP~3.0 and OpenMP~4.0, respectively.  The timelines below it illustrate the scheduling of the tasks onto two threads:  The exploitation of fine-grained, data-driven sychronization provided by task dependences, shown in Figure~\ref{fig:CodeTaskDeps4.0timeline}, allows more flexible scheduling compared to the more coarse-grained synchronization using OpenMP~3.0, shown in Figure~\ref{fig:CodeTaskDeps3.0timeline}.  A comparison of parallel speedup acheived on a 48-core system is shown in Figure~\ref{fig:dep-speedup}.  A basic task-based implementation of Cholesky edges out a highly optimized version using the loop construct, and using dependences improves performance more significantly.  For Gauss-Seidel, a basic task-based implementation far underperforms a version baased on the loop construct, but a version using task dependences peforms the best.
-
-%% STEPHEN: Sergi to provide performance results
 \begin{figure}
 \includegraphics[width=0.45\textwidth]{pics/task-perf-results.png}
-\caption{A performance evaluation of task depedendences.}
+\caption{Performance Benefit of Depedendence Support}
 \label{fig:dep-speedup}
 \end{figure}
 
-%% STEPHEN: Discuss task group (example needed or not?)
+As stated previously, the \texttt{taskwait} construct requires that all child 
+tasks of the current task must compete. The \texttt{taskgroup} construct 
+allows the current task to wait on only subset of its children, while others 
+may continue executing beyond the synchronization point. Also, the construct
+requires that all descendant tasks of that subset complete execution, which
+we call \emph{deep synchronization}. Because some children of the current 
+task can be excluded from a task group, those tasks can perform long-running 
+background activities that proceed alongside successive computational kernels.
 
-Recall that all child tasks of the current task must compete at a \texttt{taskwait} construct.  The \texttt{taskgroup} construct allows the current task to wait on only subset of its child tasks, while other child tasks may continue executing beyond the synchronization point.  Additionally, the current task waits on all descendant tasks of the child tasks in the task group, a behavior that may be termed deep synchronization.  Because child tasks of the current task can be excluded from a task group, those tasks could perform long-running background activities that proceed alongside successive computational kernels.
-
-
-%% STEPHEN: Mention task priorities briefly?
-
-% Michael: the subsubsection is just for my orientation and can be removed.
-%\subsubsection{Taskloop}
 \label{sec:Taskloop}
-
-The task-based loop, or \emph{taskloop}, is an OpenMP~4.0 extension that enables composition of the tasking model with loop-based parallelism.
-Since OpenMP~3.0, the programmer could manually decompose a loop into chunks and assign each chunk to an OpenMP task, but this code transformation was cumbersome and error-prone.
-The \code{taskloop} construct automatically transforms a loop into a parallel loop executed using OpenMP tasks.
+With OpenMP~3.0 tasking support, a user could manually decompose a loop into 
+chunks that OpenMP tasks execute. This cumbersome and error-prone manual 
+transformation is inconsistent with the philosophy of OpenMP. Thus, OpenMP~4.5
+added the \texttt{taskloop} construct to automate it. 
+Figure~\ref{fig:TaskloopExample} uses the construct to parallelize a 
+\emph{saxpy} operation. The \code{num\_tasks} clause specifies the number of 
+tasks to create for the loop. Alternatively, users specify the minimum number 
+of loop iterations per task with the \code{grainsize} clause. OpenMP~4.5
+also includes a combine \code{taskloop simd} construct to use SIMD parallelism
+in the generated tasks.
 
 \begin{figure}
 \begin{minted}{c}
@@ -126,10 +147,5 @@ void sapxy_tasks(float* a, float* b,
   }
 }
 \end{minted}
-\caption{Example for using the \code{taskloop} construct.\label{fig:TaskloopExample}}
+\caption{Example with the \code{taskloop} Construct\label{fig:TaskloopExample}}
 \end{figure}
-
-Figure~\ref{fig:TaskloopExample} shows the parallelization of a \emph{saxpy} operation using the \code{taskloop} construct.
-The \code{num\_tasks} clause specifies the number of OpenMP tasks to create for the sapxy loop.
-Alternatively, programmers can use the \code{grainsize} clause to specify the minimum number of loop iterations per task.
-The \code{taskloop} construct is also available as a combined construct to use SIMD instructions within the generated tasks.
