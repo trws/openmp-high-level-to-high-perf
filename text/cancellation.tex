@@ -33,13 +33,7 @@ search_tree(bin_tree_t * tree, int val) {
       }
 #pragma omp task shared(found)
       {
-        bin_tree_t * found_right =
-          search_tree(tree->right, val);
-        if (found_right) {
-#pragma omp atomic write
-          found = found_right;
-#pragma omp cancel taskgroup
-        }
+        // similar code for right branch
       }
 #pragma omp taskwait
     }
