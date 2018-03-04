@@ -31,9 +31,9 @@ produce(b);
 #pragma omp task
 produce(c);
 
+
 // wait on all
-//    three child
-//    tasks here
+// children here
 #pragma omp \
         taskwait
 
