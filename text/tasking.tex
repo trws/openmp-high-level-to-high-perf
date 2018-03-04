@@ -34,7 +34,7 @@ produce(c);
 
 // wait on all
 // children here
-#pragma omp \
+#pragma omp    \
         taskwait
 
 #pragma omp task
@@ -137,10 +137,10 @@ parallelism in the generated tasks.
 
 \begin{figure}
 \begin{minted}{c}
-void sapxy_tasks(float* a, float* b,
+void sapxy_tasks(float * a, float * b,
                  float s, size_t n) {
-#pragma omp taskloop simd \
-            num_tasks(NTASKS) \
+#pragma omp taskloop simd             \
+            num_tasks(NTASKS)         \
             shared(a,b) firstprivate(s)
   for (size_t i = 0; i < n; i++) {
     a[i] = a[i] * b[i] * s;
