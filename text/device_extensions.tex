@@ -50,11 +50,11 @@ unit, which offers usability benefits similar to the implicit
 
 \begin{figure}
 \begin{minted}{c}
-#pragma omp requires \
+#pragma omp requires        \
         unified_shared_memory
 struct list {
   void * data;
-  struct list *next;
+  struct list * next;
 };
 
 void foo() {
@@ -69,7 +69,7 @@ void foo() {
   }
 }
 \end{minted}
-\caption{How to \texttt{require} a unified memory space.\label{fig:unified}}
+\caption{Requiring Unified Memory\label{fig:unified}}
 \end{figure}
 
 The deep-copy support in OpenMP 5.0 will simplify the use of complex data
@@ -100,7 +100,7 @@ class Vec {
 public:
   // Normal vector methods
   #pragma omp declare mapper(Vec v) \
-    use_by_default \
+    use_by_default                  \
     map(v, v.data[0:v.len])
 };
 
@@ -108,16 +108,15 @@ void foo() {
   Vec v1(100), v2(100);
   fill_vec(v1);
   #pragma omp target teams distribute \
-      parallel for \
-      map(to:v1) /* explicitly map v1 */
+      parallel for                    \
+      map(to:v1)   // explicitly map v1
   for(auto i = 0; i < v1.size(); ++i) { 
     v2[i] = v1[i]; // implicitly map v2
   }
   // v2[0-100] == v1[0-100]
 }
 \end{minted}
-\caption{Example usage of \texttt{declare mapper} in a C++ class with private
-members.\label{fig:mapper}}
+\caption{User-Defined Mapper Example\label{fig:mapper}}
 \end{figure}
 
 We plan to refine the deep-copy mechanism further. Specifically, we will 
