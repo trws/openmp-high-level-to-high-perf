@@ -98,16 +98,16 @@ class Vec {
   double * data;
 public:
   // Normal vector methods
-  #pragma omp declare mapper(Vec v) \
-    use_by_default                  \
+#pragma omp declare mapper(Vec v) \
+    use_by_default                \
     map(v, v.data[0:v.len])
 };
 
 void foo() {
   Vec v1(100), v2(100);
   fill_vec(v1);
-  #pragma omp target teams distribute \
-      parallel for                    \
+#pragma omp target teams distribute \
+      parallel for                  \
       map(to:v1)   // explicitly map v1
   for(auto i = 0; i < v1.size(); ++i) { 
     v2[i] = v1[i]; // implicitly map v2

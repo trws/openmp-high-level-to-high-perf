@@ -25,19 +25,19 @@ whether the host and accelerator share memory.
 \begin{minted}{c}
 void example() {
   int a = 0;
-  #pragma omp parallel
+#pragma omp parallel
   {
-    #pragma omp single
+#pragma omp single
     {
       int b = 0;
-      #pragma task
+#pragma task
       while (b == 0) {
-        #pragma atomic read seq_cst
+#pragma atomic read seq_cst
         b = a;
       }
-      #pragma task
+#pragma task
       {
-        #pragma atomic update seq_cst
+#pragma atomic update seq_cst
         a++;
       }
     }
@@ -51,7 +51,7 @@ void example() {
 \begin{minted}{c}
 void example2() {
  int a = 0;
- #pragma omp target map(tofrom:a)
+#pragma omp target map(tofrom:a)
   {
     a++;
   }
@@ -59,7 +59,7 @@ void example2() {
   if (a)
     printf("incremented\n");
   
-  #pragma omp target map(to:a)
+#pragma omp target map(to:a)
   {
     a++;
   }

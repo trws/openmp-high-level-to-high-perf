@@ -14,9 +14,9 @@ data environments.
 \begin{minted}{c}
 void foo() {
   int a;
-  #pragma omp parallel
+#pragma omp parallel
   {
-    #pragma omp master
+#pragma omp master
     a = omp_get_num_threads();
   }
 }
