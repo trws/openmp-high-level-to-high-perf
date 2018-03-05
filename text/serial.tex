@@ -57,7 +57,7 @@ void example2() {
   }
 
   if (a)
-    printf{``incremented\n''};
+    printf("incremented\n");
   
   #pragma omp target map(to:a)
   {
@@ -65,7 +65,7 @@ void example2() {
   }
 
   if (a == 2)
-    printf{``incremented again\n''};
+    printf("incremented again\n");
 }
 \end{minted}
 \caption{Trivial OpenMP Accelerator Program\label{fig:trivial_target}}
