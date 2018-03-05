@@ -11,16 +11,14 @@ data of preceding ones while the current piece is executed. While this
 optimization, manual transformation to implement it involve many complex
 and error-prone source code changes. 
 
-Consistent with OpenMP's philosophy, we are developing interfaces that 
-associate data transfers with loop iteration spaces and, thus, support 
-automated pipelining. Figure~\ref{fig:pipeline} shows an example that 
-pipelines a simple stencil computation. The \texttt{map} clauses use 
-the loop itertion variable of the distributed loop to indicate that the
-compiler can divide the array along their first dimension and that three
-elements along that dimension of the input array are required to compute
-each element along that dimension of the output array. Thus, the compiler 
-can transform the loop to perform chunks of the computation while streaming
-in and out the required data.
+We are developing interfaces that associate data transfers with loop iteration 
+spaces and, thus, support automated pipelining. Figure~\ref{fig:pipeline} shows
+an example that pipelines a stencil computation. The \texttt{map} clauses use 
+the distributed loop's itertion variable to indicate that the compiler 
+can divide the arrays along their first dimension and that three elements 
+along that dimension of the input array are required to compute each element 
+along that dimension of the output array. Thus, the compiler can transform 
+the loop to perform chunks of the computation while pipelining the data.
 
 \begin{figure}
 \begin{minted}{c}
@@ -50,12 +48,11 @@ void func(double * A, double * An,
 \caption{Pipelining Example\label{fig:pipeline}}
 \end{figure}
 
-Figure~\ref{fig:pipeline-perf} compares the performance of our prototype
-of this interface~\cite{cui2017directive} to a naive version that performs
-the computation in a single chunk with no data pipelining. We present two 
-pipelining strategies. Pipelined uses a buffer of the same size and layout 
-as in the naive version so it does not save memory space but splits the 
-computation so it can overlap transfers. Pipelined-buffer uses smaller buffers
+Figure~\ref{fig:pipeline-perf} compares a prototype of this interface to a 
+naive version that does not pipeline the loop~\cite{cui2017directive}. We 
+present two pipelining strategies. Pipelined uses a buffer of the same size 
+and layout as the naive version so it does not save memory space but splits 
+the computation to overlap transfers. Pipelined-buffer uses smaller buffers
 and transforms the accesses in the loop to decrease the memory capacity that
 is required. In some cases, particularly the 3dconv and stencil kernels, the 
 buffered version's greater locality actually improves performance. For the 
