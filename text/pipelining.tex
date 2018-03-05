@@ -14,7 +14,7 @@ and error-prone source code changes.
 We are developing interfaces that associate data transfers with loop iteration 
 spaces and, thus, support automated pipelining. Figure~\ref{fig:pipeline} shows
 an example that pipelines a stencil computation. The \texttt{map} clauses use 
-the distributed loop's itertion variable to indicate that the compiler 
+the distributed loop's iteration variable to indicate that the compiler 
 can divide the arrays along their first dimension and that three elements 
 along that dimension of the input array are required to compute each element 
 along that dimension of the output array. Thus, the compiler can transform 

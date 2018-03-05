@@ -5,7 +5,7 @@ OpenMP 3.0 introduced directives to support asynchronous task parallelism.
 Those extensions were carefully designed to support that unstructured 
 parallel pattern while co-existing with OpenMP's existing support for 
 structured parallelism~\cite{ayguade2009tpds}. They generate tasks with the 
-\texttt{task} construct and synchonize them through the \texttt{taskwait} 
+\texttt{task} construct and synchronize them through the \texttt{taskwait} 
 construct and barriers. The \texttt{taskwait} construct specifies a wait 
 on the completion of child tasks of the current task, and a barrier requires 
 complete execution of all tasks in the current parallel region before any 
@@ -97,7 +97,7 @@ dependences between tasks (i.e., restrictions on their execution order).
 Figures~\ref{fig:CodeTaskDeps3.0code}~and~\ref{fig:CodeTaskDeps4.0code} show 
 task code for a producer-consumer pattern in OpenMP~3.0 and~4.0.  The 
 time lines below it illustrate the scheduling of the tasks on two threads.
-Task dependences support fine-grained, data-driven sychronization, as 
+Task dependences support fine-grained, data-driven synchronization, as 
 Figure~\ref{fig:CodeTaskDeps4.0timeline} shows, which allows more flexible 
 scheduling compared to the coarse-grained synchronization that OpenMP~3.0
 supported (Figure~\ref{fig:CodeTaskDeps3.0timeline}). 
@@ -105,8 +105,8 @@ Figure~\ref{fig:dep-speedup} compares the parallel speedup achieved on a
 48-core system. A basic task-based implementation of Cholesky edges out a 
 highly optimized version using the loop construct, and using dependences 
 improves performance more significantly. For Gauss-Seidel, a basic task-based 
-implementation far underperforms a version based on the loop construct, 
-but a version that uses task dependences provides the best peformance.
+implementation performs worse than a version based on the loop construct, 
+but a version that uses task dependences provides the best performance.
 
 \begin{figure}
 \includegraphics[width=0.45\textwidth]{pics/task-perf-results.png}
