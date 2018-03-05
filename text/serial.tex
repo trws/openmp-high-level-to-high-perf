@@ -30,14 +30,14 @@ void example() {
 #pragma omp single
     {
       int b = 0;
-#pragma task
+#pragma omp task
       while (b == 0) {
-#pragma atomic read seq_cst
+#pragma omp atomic read seq_cst
         b = a;
       }
-#pragma task
+#pragma omp task
       {
-#pragma atomic update seq_cst
+#pragma omp atomic update seq_cst
         a++;
       }
     }
