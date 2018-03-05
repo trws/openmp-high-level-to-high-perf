@@ -1,18 +1,17 @@
 \subsection{Enabling Language-Level Outlining}
 \label{sub:enabling_language_level_outlining}
 
-As we discussed in Section~\ref{sub:outlining} outlining, or extraction 
-of code into functions by the compiler, is one of the core mechanisms 
-used to implement OpenMP. Some base languages provide outlining mechanisms 
-in the form of closures or lambdas. The writers of libraries and parallel 
-frameworks find these constructs attractive since they can describe abstract 
-patterns and behaviors that then are passed an arbitrarily complex code 
-sequence and associated data. Frameworks like Kokkos~\cite{kokkos} and 
-RAJA~\cite{raja} exploit this mechanism to create flexible looping constructs, 
-like the one in Figure~\ref{fig:raja}, that can be compiled for host devices, 
-targets or any number of parallel backends depending on compile time arguments.
-These mechanisms pose challenges to OpenMP, which OpenMP 5.0 will begin to
-address.
+As Section~\ref{sub:outlining} discussed, outlining, or extraction of code 
+into functions by the compiler, is a core mechanism used to implement OpenMP. 
+Some base languages provide outlining mechanisms in the form of closures or 
+lambdas. The writers of libraries and parallel frameworks find these 
+constructs attractive since they can describe abstract patterns and behaviors 
+that then are passed an arbitrarily complex code sequence and associated data.
+Frameworks like Kokkos~\cite{kokkos} and RAJA~\cite{raja} exploit this 
+mechanism to create flexible looping constructs, like the one in 
+Figure~\ref{fig:raja}, that can be compiled for host devices, targets or 
+other parallel backends depending on compile time arguments. These 
+mechanisms pose challenges that OpenMP 5.0 will begin to address.
 
 \begin{figure}
 \begin{minted}{c}
@@ -27,10 +26,9 @@ RAJA::forall<omp_parallel_for>(
 
 While OpenMP must evolve to support mechanisms such as lambdas, Fortran
 users of OpenMP currently cannot exploit the capabilities that we will 
-provide. So far, although many OpenMP implementations use outlining, they 
-do not expose the resulting functions to the user. However, exposing these 
-functions could provide many benefits, including a mechanism to support
-closures in Fortran.
+provide. Although many OpenMP implementations use outlining, they do not 
+expose the resulting functions to the user. However, exposing them could 
+provide many benefits, including a mechanism to support closures in Fortran.
  
 We could extend the \texttt{task} directive to create a form 
 of "callable task" or OpenMP closure object that would be portable across 
@@ -38,12 +36,11 @@ C, C++ and Fortran. The extension would significantly reduce the work
 required to make an arbitrary callable object with state in C and Fortran.
 It would also support library implementations with functionality like that 
 of Kokkos and RAJA that all three languages could use. Challenges remain,
-however, particularly how to integrate the functionality well into OpenMP 
-and how to make it as efficient as possible at runtime. A simple and 
-portable solution generates a structure, or derived type, and a function 
-pointer. It would integrate well with established libraries, but is unlikely 
-to optimize well for constructs that will be called many times. Despite 
-the challenges, giving users control of outlining could be
-a major step forward for OpenMP.
+however, such as to integrate the functionality with existing OpenMP 
+constructs and how to make it as efficient as possible at runtime. A simple 
+and portable solution generates a structure, or derived type, and a function 
+pointer. This solution easily integrates with established libraries, but will
+likely perform poorly for frequently called functions. Despite the challenges,
+giving users control of outlining could be a major step forward for OpenMP.
 
 
