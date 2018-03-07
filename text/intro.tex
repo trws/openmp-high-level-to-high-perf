@@ -6,12 +6,11 @@ Intel, Kuck and Associates, and SGI) were brought together by the Accelerated
 Strategic Computing Initiative~(ASCI) of the Department of Energy~(DOE) to 
 create a portable application programming interface~(API) for shared memory 
 computers. Vendors do not typically work well together unless an outside 
-force compels cooperation. In this case, that compulsion came from Mary 
-Zosel and the ASCI parallel tools team who communicated that ASCI would 
-only purchase systems from vendors who supported a portable API for shared 
-memory programming. DOE researchers played a key role in defining OpenMP 
-from the beginning, helping to ensure that the API met the needs of HPC 
-applications programmers.
+force compels cooperation. Mary Zosel and the ASCI parallel tools team 
+provided that compulsion by communicating that ASCI would only purchase 
+systems with a portable API for shared memory programming. Their role in 
+the beginning of OpenMP ensured that it met the needs of HPC applications 
+programmers.
 
 Early public presentations about the project~\cite{ewomp99} clearly
 defined the initial group's goals:
@@ -35,34 +34,33 @@ defined the initial group's goals:
 \end{itemize}
 
 The first OpenMP specification  was released in November 1997 at SC97. The
-OpenMP community in the late 90s was painfully aware of other parallel
-programming  standardization efforts, such as HPF~(High Performance Fortran) and MPI 2.0, that
-suffered from multi-year delays as implementors struggled to produce robust,
-application-ready implementations. Thus, OpenMP by design was narrowly
-focused on current practice. This focus led to the availability of multiple
-vendor-supported implementations within a year of the release of that 
+early OpenMP community knew that other parallel programming  standardization 
+efforts, such as HPF~(High Performance Fortran) and MPI 2.0, suffered from 
+multi-year delays as implementors struggled to produce robust, 
+application-ready implementations. Thus, OpenMP by design narrowly focused 
+on current practice. This focus led to the availability of multiple
+vendor-supported implementations within a year of the release of the 
 first specification. 
 
-Over time, additional vendors and research organizations joined the effort.  A
-non-profit corporation, the OpenMP Architecture Review Board~(ARB), was 
-incorporated to prevent any single vendor from dominating the standard.
-The current 30 members of the OpenMP ARB continue to own and to evolve 
-the API to serve the needs of parallel application programmers. The ARB
-retains many of the original goals of the initial group in its mission,
-which is to standardize directive-based multi-language high-level 
-parallelism that is performant, productive and portable. The OpenMP 
-API now provides a portable, scalable model that gives parallel 
-programmers a simple and flexible interface for developing parallel 
-applications for platforms ranging from embedded systems and accelerator 
-devices to multicore systems.
+Over time, additional vendors and research organizations joined the effort.  
+A non-profit corporation, the OpenMP Architecture Review Board~(ARB), was 
+created to prevent any single vendor from dominating the standard. The 
+current 30 members of the OpenMP ARB continue to own and to evolve the API 
+to serve the needs of parallel application programmers. The ARB retains many 
+of the original goals in its current mission, which is to standardize 
+directive-based multi-language high-level parallelism that is performant, 
+productive and portable. The OpenMP API now provides a portable, scalable 
+model that gives parallel programmers a simple and flexible interface for 
+developing parallel applications for platforms ranging from embedded systems 
+and accelerator devices to multicore systems.
 
-Reviewing the original goals of OpenMP, we find that all but two have 
-been largely retained. Specifically, OpenMP has evolved to support almost 
-all parallel programming patterns, which necessarily implies a much larger 
-specification than originally envisioned. Further, while serial equivalence
-can still be achieved, that range of patterns necessarily leads to many
-opportunities to deviate from it. Otherwise, the only change to the original
-goals is that the scope of OpenMP has extended beyond shared memory. 
+OpenMP retains all but two of its original goals. Specifically, OpenMP has 
+evolved to support almost all parallel programming patterns, which necessarily
+implies a larger specification than originally envisioned. Further, while 
+serial equivalence is still achievable, that range of patterns necessarily 
+leads to many opportunities to deviate from it. Otherwise, the only change 
+to the original goals is that the scope of OpenMP has extended beyond 
+shared memory. 
 
 We comprehensively examine the state of OpenMP in anticipation of the imminent 
 release of version 5.0 of the API. We first review the evolution of OpenMP 

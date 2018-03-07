@@ -1,45 +1,44 @@
 \subsection{Allocators and Hierarchical Memory}
 \label{sub:allocators_and_hierarchical_memory}
 
-Modern computing devices employ a memory hierarchy, which is expected to become
-even deeper in future systems, following the introduction of high-bandwidth
-memory, non-volatile RAM and other developments.
-Each of these technologies has a different programming interface and distinct
-performance characteristics.
-Addressing these differences becomes increasingly critical for all types of
-computing where performance is tied to memory bandwidth: as the fastest
-resources typically have limited capacity, placement choices have direct
-influence on application performance.
-To enable programmability of these technologies and portability across
-platforms, OpenMP~5.0 includes a consistent and portable interface for memory
-placement in tiered memory systems.
+Memory hierarchies are expected to become deeper in future systems with the
+use of technologies such as high-bandwidth memory and non-volatile RAM. Each 
+of these technologies has a different programming interface and distinct
+performance characteristics. Programming mechanisms must address these 
+differences and support intelligent data placement since the fastest resources
+typically have limited capacity. To enable programmability of these 
+technologies and portability across platforms, OpenMP~5.0 will include a 
+consistent and portable interface for placement within the memory hierarchy.
 
 The term \emph{memory space} refers to a memory resource available in the
-system, at the time the OpenMP program is executed. Memory spaces differ in their characteristics, for instance in bandwidth or
-capacity. OpenMP defines a set of pre-defined \emph{memory spaces} that map to memory resources found in today's HPC systems.
+system when the OpenMP program is executed. Memory spaces differ in their characteristics, for instance in bandwidth or
+capacity. OpenMP will define intuitive pre-defined \emph{memory spaces} that map to memory resources found in today's HPC systems.
 
-An \emph{allocator} is an object that is associated to a memory space when created. It allows to allocate and free memory from the resources of its associated memory space. OpenMP offers a set of pre-defined memory allocators that match the pre-defined memory spaces. The pre-defined memory allocators support, for example, the selection of a memory space with large capacity, high bandwidth or low latency, or memory local to a particular thread or thread team.
+An \emph{allocator} is an object that is associated to a memory space when created. It allows to allocate and free memory from the resources of its associated memory space. OpenMP will provide a set of pre-defined memory allocators that match its pre-defined memory spaces. For example, the pre-defined memory allocators can select a memory space with large capacity, high bandwidth or low latency, 
+or memory local to a particular thread or thread team.
+
 
 \begin{figure}
 \begin{minted}{c}
 double *A = (double*) omp_alloc(N,
             omp_high_bw_mem_alloc)
 \end{minted}
-\caption{Allocation from high-bandwidth memory.\label{fig:allocators}}
+\caption{High-Bandwidth Memory Allocation\label{fig:allocators}}
 \end{figure}
 
-The concept of memory allocation in OpenMP is supported by the
-\texttt{omp\_alloc} and \texttt{omp\_free} routines, which are offered as supersets for \texttt{malloc} and \texttt{free} from the C standard library.
-An allocator can also be used within the \texttt{allocate} clause that is
-supported on all constructs that accept data sharing clauses.
+OpenMP 5.0 will include the \texttt{omp\_alloc} and \texttt{omp\_free} 
+routines as supersets for \texttt{malloc} and \texttt{free} from 
+the standard library. The \texttt{allocate} directive allows to specify the allocation properties of variables that are not allocated through an API call such as global or stack variables. The \texttt{allocate} clause will directly specify 
+the use of an allocator for any construct that accepts data sharing clauses.
 It enables the allocation of \texttt{private} variables in a particular memory
-kind.
-Figure~\ref{fig:allocators} illustrates the use of the pre-defined
-\texttt{omp\_high\_bw\_mem\_alloc} allocator to allocate memory from the memory
-kind with high bandwidth.
+space. Figure~\ref{fig:allocators} illustrates the use of the pre-defined
+\texttt{omp\_high\_bw\_mem\_alloc} allocator to allocate memory from the 
+high bandwidth memory space.
 
-In order to support the outfitting of existing programs and to enable the quick adoption of a program to a specific memory configuration, the allocators are of type \texttt{omp\_allocator\_t *} and they can be treated as regular pointers in the program.
-This allows to pass them by argument and once the memory allocation calls have been changed to using the OpenMP API functions, these code places do not have to be modified again just to use a different memory kind but only the allocator passed to the function needs to be adjusted.
+In order to support rapid adaption of existing programs to a specific memory 
+configuration, the pre-defined allocators are of type \texttt{omp\_allocator\_t *} and they can be treated as regular pointers in the program. Thus, they can be passed by argument and once 
+memory allocation uses the OpenMP API function, these code places do not 
+have to be modified again just to use a different memory space but just the allocator passed to the function needs to be adjusted.
 
 \begin{figure}[htb]
 \begin{minted}[fontsize=\footnotesize]{c}
@@ -56,7 +55,7 @@ void some_function ( omp_allocator_t *allocator )
 some_function(omp_high_bw_mem_alloc);
 some_function(omp_default_mem_alloc);
 \end{minted}
-\caption{Separating memory configuration from allocations.\label{fig:separation-concerns-alloc}}
+\caption{Separating memory selection from allocation.\label{fig:separation-concerns-alloc}}
 \end{figure}
 
 Figure~\ref{fig:separation-concerns-alloc} illustrates how a function can be defined to allow callers to define the memory policy the function should use when allocating the private array \emph{some\_array}.

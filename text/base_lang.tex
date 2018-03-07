@@ -4,34 +4,23 @@
 Although OpenMP began with separate specifications for C/C++ and 
 Fortran, as we discussed in Section~\ref{sec:evolve}, OpenMP 2.5 
 merged them into a single document. Although that choice was
-partly due to the pragmatic reduction in effort to move the base 
-languages forward together, the original goal of a consistent API 
-across the base languages, which remains a key part of OpenMP's 
-guiding philosophy, was the most important reason. This language 
-independence is one of OpenMP's core strengths since OpenMP has 
-greater portability and generality, not only across the C, C++ 
-and Fortran but also in its design as a result. 
-
-%% BRONIS: My solution is to merge the two sections since
-%% BRONIS: language independence is just one aspect of the
-%% BRONIS: relationship to the base language
-%% \tom{this is too short, ideas on how to expand?}
-
-%% BRONIS: Still need to rework the following paragraph
-%% BRONIS: Need to introduce the concept of directives
-%% BRONIS: being Turing complete and that OpenMP can bridge
-%% BRONIS: differences across the languages
+partly pragmatic -- it reduced the effort to move the base languages 
+forward -- the original goal of a consistent API across the base 
+languages, which remains a key part of OpenMP's guiding philosophy, 
+was the primary reason. This language independence is one of OpenMP's 
+core strengths since OpenMP has greater portability and generality, 
+not only across the C, C++ and Fortran but also in its design as a result. 
 
 OpenMP, by itself, is not a language.  It provides an API for portably
 expressing parallelism and concurrency across three independent base languages.
 As discussed above, OpenMP attempts to provide the same experience and easy
-interoperability between all three while also being consistent with the specific
-base language. Thus, to the extent possible, OpenMP relies on the base language
-for sequential programming constructs. However, some mistakenly claim that a
-directive-based approach (i.e., pragmas in C and C++) is necessarily limited in
-it scope. In reality, the approach has the potential to be Turing complete and
-any construct that is available in a base language could also be provided
-through a directive. 
+interoperability between all three while also being consistent with the 
+specific base language. Thus, to the extent possible, OpenMP relies on the 
+base language for sequential programming constructs. However, some mistakenly 
+claim that a directive-based approach (i.e., pragmas in C and C++) is 
+necessarily limited in it scope. In reality, the approach can be Turing 
+complete and any construct that is available in a base language could also 
+be provided through a directive. 
 
 Traditionally, OpenMP has limited its scope in several ways. However, we 
 are finding that as the API grows and addresses more programming patterns
@@ -53,31 +42,28 @@ on each base language to define the behavior of a given construct
 within each thread of execution or block of code. Further, we are
 actively updating OpenMP to support recent base language standards. 
 OpenMP 4.0 added Fortran 2003~\cite{F2003} as a normative reference
-while OpenMP 5.0 will add C11~\cite{c11}, C++11~\cite{c++11},
-14~\cite{c++14} and 17~\cite{c++17} as normative references. We plan to add
-Fortran 2008~\cite{F2008} soon as well.
+while OpenMP 5.0 will add Fortran 2008~\cite{F2008}, C11~\cite{c11}, 
+C++11~\cite{c++11}, 14~\cite{c++14} and 17~\cite{c++17}.
 
-The evolution of the base languages, as captured in their normative
-references, complicates OpenMP's relationship to them. Before the 
-release of C11 and C++11, C and C++ did not have any well defined 
-concept of a data race, or of threading in general. In fact, the 
-ISO C99 standard~\cite{c99} does not contain the term ``thread'' at all,
-and only contains the word ``race'' as part of the term ``brace.''
-In general, the original normative references did not address
-parallelization. Thus, OpenMP has provided all threading and memory 
-model semantics for a program that used OpenMP constructs. In 
-order to provide full support for the later C and C++ standards, 
-which include integrated threading models, acquire and release 
-memory models and other built-in parallel concepts, OpenMP must 
-ensure that its semantics do not conflict with those of the base
-languages. That process has begun with TR6~\cite{openmptr6}~(Technical Report 6), which is 
-the most recent preview of OpenMP 5.0 and will continue beyond
-OpenMP 5.0.
+The evolution of the base languages in their normative references 
+complicates OpenMP's relationship to them. Before the release of C11 
+and C++11, C and C++ did not have any well defined concept of a data 
+race or threading. In fact, the ISO C99 standard~\cite{c99} does not 
+contain the term ``thread'' at all, and only contains the word ``race'' 
+as part of the term ``brace.'' In general, the original normative references 
+did not address parallelization. Thus, OpenMP has provided all threading 
+and memory model semantics for a program that used OpenMP constructs. In 
+order to provide full support for the later C and C++ standards, which 
+include integrated threading models, acquire and release memory models 
+and other built-in parallel concepts, OpenMP must ensure that its semantics 
+do not conflict with those of the base languages. That process has begun 
+with TR6~\cite{openmptr6}~(Technical Report 6), which is the most recent 
+preview of OpenMP 5.0 and will continue beyond OpenMP 5.0.
 
-Finally, while a pragma-based approach is a natural one for Fortran
-and C programmers, it is not the most natural one for C++. Besides
-complex questions related to support for parallelism and for lambdas
-that arise with the latest C++ standards~\cite{c++17}, we are beginning to look at
+Finally, while a pragma-based approach is natural for Fortran and C 
+programmers, it is not the most natural one for C++. Besides complex 
+questions related to support for parallelism and for lambdas that arise 
+with the latest C++ standards~\cite{c++17}, we are beginning to look at
 other possible mechanisms for C++, such as attributes.
 
 

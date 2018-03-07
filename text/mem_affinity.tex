@@ -1,31 +1,54 @@
 \subsection{Memory Affinity}
 \label{sub:memory_affinity}
 
-%% BRONIS: I moved hierarchical to the previous section
-%% BRONIS: I think we can still say something on affinity a la Data Tsar
+While the OpenMP~5.0 will specify task affinity based on memory locations 
+as discussed in Section~\ref{sub:new_tasking}, a longer term goal is to 
+support more general memory affinity. Intuitive interfaces for this complex 
+problem are difficult to specify. Nonetheless, we have explored interfaces
+that associate data to computation and then appropriately locate, transform 
+or replicate the data based on the distribution of the computation of existing
+mechanisms in OpenMP~\cite{ctsar-tpds,scogland:7Hpt64iV}.
+ 
+Figure~\ref{fig:atsar-gemm} shows a more recent direction that specifies how
+to partition computation and to map the associated data range to the threads 
+of a \texttt{parallel} region and then to a set of devices. This example partitions 
+the GEMM loop into two-dimensional tiles by columns across sockets and rows 
+across devices associated with a given socket. Extensions like this require 
+careful consideration due to their potentially large number of changes, and 
+high complexity, but the information can support significant optimizations.
+Beyond providing affinity information, these annotations are sufficient to 
+allow for cross-device coscheduling across non-shared-memory devices.
 
-While the near-term goals include using memory location information to inform
-task affinity, as discussed in Section~\ref{sub:new_tasking}, one of the
-longer-term goals is to introduce more general memory affinity into OpenMP.  One
-of the interfaces we've explored for this accomplishes it by associating data to
-computation, then using the normal distribution of computation onto compute
-resources appropriately locates, transforms or replicates data.  A prototype
-version~\cite{ctsar-tpds,scogland:7Hpt64iV} has been produced that works for a
-subset of the solution space.  More recent developments could allow code as presented
-in Figure~\ref{fig:atsar-gemm} to partition a logical range across threads in a
-\texttt{parallel} region, or target devices in a system, or an arbitrary nesting
-thereof.
+Figure~\ref{fig:atsar-perf} shows performance results from a prototype 
+implementation across five benchmark kernels in terms of speedup over a 
+baseline OpenMP static schedule that uses all cores. The annotations and 
+scheduling improvements that the information enables can increase performance 
+substantially.  The optimization space being explored in the figure is twofold.
+First is a pair of scheduling algorithms designed to be used with partitioning,
+either a classic static even scheduling, and an adaptive scheduler that attempts
+to predict the best partitioning based on past performance.  The CPU adaptive
+results represent using the adaptive scheduler on the same resources as the
+baseline.  The second axis is the set of devices the runtime system is allowed
+to use when distributing computation, and data.  It can be the CPU cores only, a
+set of one to four NVIDIA c1060 GPUs, or both.  All of these options can be
+targeted with the same base code, in the case of GEMM the code in
+Figure~\ref{fig:atsar-gemm}, just changing runtime parameters.
+
+The amount of expressive power this kind of extension can provide is
+significant, but so is the complexity and the burden on the programmer who is
+trying to use it.  We intend to continue exploring this space in the future to
+provide an appropriate long-term solution.
 
 \begin{figure}
   \begin{minted}[fontsize=\footnotesize]{c}
 int i, is=0, ie=isz, j, js=0, je=jsz;
 float A[ksz][jsz], B[isz][ksz];
-float *C = (float*)malloc(sizeof(C[0])*isz*jsz);
+float * C = (float*)malloc(sizeof(C[0])*isz*jsz);
 int   C_pitch = jsz;
 
-#pragma omp parallel devices(socket)
- part(adaptive: j_id=js; j_id<je; ++j_id)        \
- map(to: A[0:ksz][:,part=j_id], B[0:isz][0:ksz]) \
+#pragma omp parallel devices(socket)              \
+ part(adaptive: j_id=js; j_id<je; ++j_id)         \
+ map(to: A[0:ksz][:,part=j_id], B[0:isz][0:ksz])  \
  map(tofrom: C[0:isz,pitch=C_pitch][:,part=j_id])
 { // Partitioned parallel region
 #pragma omp target teams distribute parallel for  \
@@ -43,29 +66,12 @@ int   C_pitch = jsz;
   }
 }
 \end{minted}
-\caption{A possible interface to partition memory for affinity.\label{fig:atsar-gemm}}
+\caption{Possible Memory Affinity Interface\label{fig:atsar-gemm}}
 \end{figure}
-
-The code in Figure~\ref{fig:atsar-gemm} would partition the GEMM loop into
-two-dimensional tiles by columns across sockets and rows across devices
-associated with a given socket.  Extensions like this require careful
-consideration due to their potentially large number of changes, and high
-complexity, but the optimizations permitted by providing this level of
-information to the compiler can be significant.  Beyond providing affinity
-information, these annotations are sufficient to allow for cross-device
-coscheduling across non-shared-memory devices.  Figure~\ref{fig:atsar-perf}
-shows performance results from a prototype implementation across five benchmark
-kernels in terms of speedup over a baseline OpenMP static schedule using all
-cores.  The annotations and scheduling improvements they allow for increase
-performance even on CPU alone, and in all but one case gain yet more from
-co-scheduling across CPU and GPU devices.
-
 
 \begin{figure*}[t]
         \includegraphics[width=\textwidth]{system-1-combined-part}
-        \caption{Memory partitioning/affinity performance combined with
-        cross-device coscheduling enabled by the same
-      extensions.\label{fig:atsar-perf}}
+        \caption{Performance Benefit of Memory Partitioning/Affinity\label{fig:atsar-perf}}
 \end{figure*}
 
 

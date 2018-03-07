@@ -6,24 +6,23 @@
 
 Currently, only threads of the parallel region in which an explicit
 OpenMP task is generated can execute that task. This limitation leads
-to the unintuitive requirement that pure tasking programs in OpenMP
-must first start a \texttt{parallel} region and then must ensure that 
-only one thread executes the code that generates the tasks, for example, 
-by using a \texttt{single} region. While unintuitive, the requirement is
-simple. However, it also can unnecessarily limit parallelism in more
-complex applications since other threads (resources) may be idle and 
-available to execute the tasks.
+to the unintuitive (if simple) requirement that pure tasking programs 
+in OpenMP must first start a \texttt{parallel} region and then must 
+ensure that only one thread executes the code that generates the tasks, 
+for example, by using a \texttt{single} region. This limitation can 
+restrict parallelism in more complex applications since other threads 
+(resources) may be idle and available to execute the tasks.
 
 We are exploring a concept of free-agent threads to overcome this 
 limitation. The mechanism would allow any thread that is not assigned
 to a team to execute any explicit task. It would fully eliminate the
 limitation -- all threads could execute explicit tasks that are 
 generated in the initial thread without requiring an explicit 
-\texttt{parallel} region. This mechanism will require us to define 
+\texttt{parallel} region. We need to resolve many details, such as
 the return values for runtime routines such as \texttt{omp\_get\_thread\_num}
-when executed by a thread that is not part of the team. We must resolve
-many other details. Since this change will represent a major change in 
-the OpenMP execution model, we do not expect to adopt it before OpenMP 6.0.
+when executed by a thread that is not part of the team. Since this change 
+will represent a major change in the OpenMP execution model, we do not 
+expect to adopt it before OpenMP~6.0.
 
 
 

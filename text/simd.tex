@@ -1,17 +1,16 @@
 \subsection{SIMD}
 \label{sub:simd}
 
-Compilers have included technology to auto-vectorize loops for many years 
-but its effectiveness has provided limited benefit to real applications 
-because of the complexity of determining if a given loop can vectorized 
-(i.e., are the loop iterations free of dependences that prevent vectorization)
-and, if so, the most profitable vectorization strategy. These limitations
-led almost all major compilers to include implementation-defined 
+Compilers have included technology to auto-vectorize loops for many years. 
+However, this support has limited effectiveness for real applications because 
+of the complexity of determining the potential correctness and benefit of 
+vectorization (e.g., are loop iterations free of dependences). These 
+limitations led almost all major compilers to include implementation-defined 
 vectorization directives. While frequently spelled\texttt{ivdep}, the
 semantics often subtly varied across compilers. Due to the similarity 
 with the original motivation for OpenMP with respect to threading 
-directives, we decided to  include explicit directives to exploit 
-SIMD parallelism in OpenMP 4.0.
+directives, we included explicit directives to exploit SIMD parallelism 
+in OpenMP 4.0.
 
 The \texttt{simd} directive expresses that a given loop nest has no
 dependences that would prevent vectorization. The compiler can then 
@@ -56,9 +55,9 @@ void example(double * v, size_t n) {
         v[i] = scale(v[i], alpha);
 }
 \end{minted}
-\caption{Example of SIMD vectorization in OpenMP.\label{fig:simd-example}}
+\caption{OpenMP SIMD Vectorization Example\label{fig:simd-example}}
 \end{figure}
 
-%% BRONIS: Can we add some performance results here?
+
 
 

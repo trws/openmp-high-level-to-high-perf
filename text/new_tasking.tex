@@ -1,10 +1,6 @@
 \subsection{Further Evolution of Tasking Support}
 \label{sub:new_tasking}
 
-%% BRONIS: We should  cover 5.0 tasking extensions
-%% BRONIS: We should focus mostly on task affinity although we can also
-%% BRONIS: cover/mention task reductions and mutexinout dependences
-
 OpenMP 5.0 continues the evolution of the OpenMP tasking model toward 
 addressing more use cases.  Task reductions, task affinity, and 
 additional forms of task dependences provide enhanced performance and 
@@ -27,13 +23,10 @@ constraints that their executions are mutually exclusive and that
 they satisfy any dependences with respect to tasks outside the set.
 
 Like task dependences, task affinity indicates the data used by a task. 
-Unlike task dependences task affinity is a hint providing the runtime 
-library additional information to guide the placement of tasks onto 
-threads, rather than enforcing an ordering among the threads that use 
-the data.  The runtime library may schedule tasks using the same data 
-onto the same thread or onto threads executing on cores in the same 
-NUMA  domain.  An advanced runtime library may also use the information 
-to tune work stealing for better locality. Use of the \texttt{affinity} 
-clause introduced for this purpose may be extended to other constructs 
-in future versions of OpenMP.
+However, task affinity is a hint to the runtime that guides the scheduling 
+of tasks to threads, rather than enforcing an ordering among the threads. 
+The runtime may schedule tasks that use the same data to the same thread 
+or threads that execute on cores in the same NUMA  domain. An advanced 
+runtime may also use the information to tune work stealing for better 
+locality. Future versions of OpenMP may apply the \texttt{affinity} clause to other constructs besides the \texttt{task} construct.
 

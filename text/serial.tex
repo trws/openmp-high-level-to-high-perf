@@ -1,7 +1,7 @@
 \subsection{Serial Equivalence}
 \label{sub:serial_equivalence}
 
-A original goal for OpenMP was to support serial equivalence to the 
+An original goal for OpenMP was to support serial equivalence to the 
 greatest possible extent. As a result, many think that all OpenMP programs, 
 or at least all correct OpenMP programs, are guaranteed the same result
 if the code is executed in parallel as when the compiler completely 
@@ -12,69 +12,73 @@ fail to exhibit serial equivalence. Today, many more opportunities exist
 to write OpenMP programs that do not provide serial equivalence. 
 
 As OpenMP has evolved, the opportunities to write programs that do not
-exhibit serial equivalence have increased. OpenMP support for tasking 
-provides numerous opportunities. Figure~\ref{fig:trivial_task} provides
-a simple tasking program in which the serial version has an infinite loop
-while the parallel version will complete quickly, assuming that the parallel
-region uses two or more threads and different threads execute the two tasks.
-Figure~\ref{fig:trivial_target} shows a pair of example functions, where
-\texttt{increment} will take and increment a value whether it executes with
-OpenMP or not, \texttt{example} may or may not depending on the platform even
-though it calls \texttt{increment} to do the work.  While this example clearly
-contains a bug, such manipulations of device data lifetimes can cause different
-execution between OpenMP and serial \emph{even when the OpenMP code is also
-serial}.
+exhibit serial equivalence have increased. Figure~\ref{fig:trivial_task} 
+provides a simple tasking program in which the serial version has an infinite 
+loop while the parallel version will complete quickly, assuming that the 
+parallel region uses two or more threads and different threads execute the 
+two tasks. Figure~\ref{fig:trivial_target} shows a simple example for 
+accelerators in which ``incremented'' is always printed, while 
+``incremented again'' may or may not print with OpenMP, depending on 
+whether the host and accelerator share memory. 
 
 \begin{figure}
 \begin{minted}{c}
 void example() {
   int a = 0;
-  #pragma omp parallel
+#pragma omp parallel
   {
-    #pragma omp single
+#pragma omp single
     {
       int b = 0;
-      #pragma task
+#pragma omp task
       while (b == 0) {
-        #pragma atomic read seq_cst
+#pragma omp atomic read seq_cst
         b = a;
       }
-      #pragma task
+#pragma omp task
       {
-        #pragma atomic update seq_cst
+#pragma omp atomic update seq_cst
         a++;
       }
     }
   }
 }
 \end{minted}
-\caption{A trivial program with OpenMP tasking.\label{fig:trivial_task}}
+\caption{Trivial OpenMP Tasking Program\label{fig:trivial_task}}
 \end{figure}
 
 \begin{figure}
 \begin{minted}{c}
-void increment(int * p) {
-  #pragma omp target map(tofrom:p[0:1])
+void example2() {
+ int a = 0;
+#pragma omp target map(tofrom:a)
   {
-    (*p)++;
+    a++;
   }
-}
-void example() {
-  #pragma omp target data map(to: p[0:1])
-  example1();
+
+  if (a)
+    printf("incremented\n");
+  
+#pragma omp target map(to:a)
+  {
+    a++;
+  }
+
+  if (a == 2)
+    printf("incremented again\n");
 }
 \end{minted}
-\caption{A trivial program with OpenMP target.\label{fig:trivial_target}}
+\caption{Trivial OpenMP Accelerator Program\label{fig:trivial_target}}
 \end{figure}
+
 
 In general, serial equivalence requires the program or runtime to limit
 the possible execution orders. As OpenMP has grown to support more parallel 
-programming patterns, the range of execution orders has as well, which 
-implies either more opportunities to eschew serial equivalence or more
-limitations on the range of execution orders. Since such limitations would 
-also create performance limitations, OpenMP (or any parallel programming 
-system) tries to avoid them unless the programmer requires them. Thus, the 
+programming patterns, the range of execution orders has also grown, which 
+implies more opportunities not to exhibit serial equivalence or would require
+more execution order limitations, which would limit performance. OpenMP tries 
+to avoid those limitations unless the programmer requires them. Thus, the 
 philosophy of OpenMP remains to provide constructs that simplify the 
-enforcement of serial equivalence when desired but that has evolved not 
-to limit parallelism -- and by extension -- performance unnecessarily.
+enforcement of serial equivalence when desired but has evolved not 
+to limit parallelism and, by extension, performance unnecessarily.
 

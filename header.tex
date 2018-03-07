@@ -29,6 +29,10 @@
 \usepackage{balance}
 \usepackage{multirow}
 \usepackage{caption}
+\usepackage{upquote}
+\AtBeginDocument{%
+\def\PYZsq{\textquotesingle}%
+}
 \DeclareCaptionType{copyrightbox}
 
 %conditional so I can compile with minted, others with lstlisting in case they
@@ -86,6 +90,8 @@
 % }
 
 \IEEEoverridecommandlockouts
+% NOTE: manually balance reference columns
+\IEEEtriggeratref{13}
 
 \begin{document}
 
@@ -162,9 +168,9 @@ The Ongoing Evolution of OpenMP
 \input{text/acknowledgments}
 
 % \begin{spacing}{0.9}
-  \bibliographystyle{style/abbrv}
-  % \balance
-  \bibliography{bib/tom-papers}
+\bibliographystyle{style/abbrv}
+% \balance
+\bibliography{bib/tom-papers}
 % \end{spacing}
 
 % BIOS START HERE: currently disabled

@@ -11,22 +11,19 @@ frequently use a different instruction set and programming paradigm. Further,
 they often do not coherently share memory with the host processors that
 OpenMP originally targeted.
 
-In order to address this challenging, but potentially highly rewarding, 
-group of devices OpenMP now has the \texttt{target} directive along with 
-several supporting directives and routines. These additions support a 
-distributed memory offload model that uses the existing shared-memory 
-model on each device. Since many accelerators are many-core devices, the
-supporting directives include the \texttt{teams} and \texttt{distribute} 
-directives, which create leagues of independent thread teams and share 
-loop iterations among them. Accelerators can execute these thread teams 
-efficiently since synchronization across them is highly restricted while
-all OpenMP functionality (except the device constructs themselves currently)
-may be used within each of the teams. Figure~\ref{fig:target-loop} presents 
-a simple loop offloaded to the default device, dividing work across teams 
-and threads from a single loop. The \texttt{map} clauses map data into the 
-device data environment and, if desired, update the view of the data on the 
-device before execution of the \texttt{target} region or on the host after 
-its execution.
+OpenMP~4.0 added the \texttt{target} directive and related directives and 
+routines to address these devices. These additions provide an offload model
+that uses the existing shared-memory model on each device. Since many 
+accelerators are many-core devices, we added the \texttt{teams} and 
+\texttt{distribute} directives, which create leagues of independent thread 
+teams and share loop iterations among them. Accelerators can execute these 
+teams efficiently since synchronization across them is highly restricted while
+all OpenMP functionality (except the device constructs) may be used within 
+each team. The code in Figure~\ref{fig:target-loop} offloads a simple loop 
+to the default device and divides its work across teams of threads. The 
+\texttt{map} clauses map data into the device data environment and, if 
+desired, update the view of the data on the device (host) before (after)
+execution of the \texttt{target} region.
 
 \begin{figure}
 \begin{minted}{c}
@@ -37,20 +34,21 @@ its execution.
 for(size_t i = 0; i < n; ++i)
   out_arr[i] = in_arr[i] * in_arr[i];
 \end{minted}
-\caption{Example of device offload in OpenMP.\label{fig:target-loop}}
+\caption{OpenMP Device Offload Example\label{fig:target-loop}}
 \end{figure}
 
-In addition to the using the \texttt{map} clause on the \texttt{target}
-directive, there are a number of other options for device data management. 
-These options include directives for the definition of structured target data 
+In addition to the \texttt{map} clause on the \texttt{target} directive, 
+OpenMP provides several other options for device data management. These 
+options include directives for the definition of structured target data 
 regions and also for unstructured transfers or updates between host and 
 device data. The \texttt{nowait} clause can be used on the \texttt{target}
 directive and on these device data management directives to enable the 
-implementation to treat them as asynchronous tasks.  This feature allows 
-overlap of host and device computation and data transfers.  It can also be 
-combined with task dependences, described in Section~\ref{sub:tasking},  
-for data-driven asynchronous execution. Device memory runtime routines are 
-also provided.
+implementation to treat them as asynchronous tasks. This feature allows 
+overlap of host and device computation and data transfers. It can also be 
+combined with task dependences, described in Section~\ref{sub:tasking}, for 
+data-driven asynchronous execution. 
+%% BRONIS: Seems like a throwaway line since we do not say anything about them
+%% Device memory runtime routines are also provided.
 
 Similarly to \texttt{simd} regions, \texttt{target} regions that contain 
 function calls are particularly challenging to support.  Unlike with 

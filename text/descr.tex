@@ -1,26 +1,22 @@
 \subsection{Descriptive or Prescriptive Semantics}
 \label{sub:descriptive}
 
-A debate has emerged within the high performance language
-community about whether programming languages should 
-provide \emph{descriptive} or \emph{prescriptive} semantics. 
-A language provides descriptive semantics if its constructs 
-describe the computation that should be performed but provides 
-the compiler and runtime the flexibility to determine exactly 
-how the computation is performed. Alternatively, prescriptive
-semantics not only describe the required computation but 
-also all details of how to perform it.
+The high performance community is currently debating the value of 
+\emph{descriptive} versus \emph{prescriptive} programming semantics. 
+Semantics are descriptive if programming constructs describe the 
+computation that should be performed but provide the compiler and 
+runtime the flexibility to determine exactly how to perform the 
+computation. Programming constructs with prescriptive semantics 
+prescribe all details of how to perform the required computation.
 
-Our position is that the debate is misguided for two reasons.
-First, the debate assumes a binary choice between the two 
-types of semantics. However, almost all languages have constructs 
-that are descriptive while others are (more) prescriptive. 
-Specifically within the HPC community, the claim has been 
-made that OpenACC is descriptive while OpenMP is
-prescriptive~\cite{juckeland2016isc,wolfe16descriptive}. While OpenACC provides
-more descriptive constructs in its most recent version than OpenMP does, the
-\texttt{acc parallel loop} directive is prescriptive since sometimes users want
-to \emph{know} that a given loop will be parallelized. 
+Our position is that the debate is misguided since it assumes a binary 
+choice between the two types of semantics. However, almost all languages 
+have constructs that are descriptive while others are (more) prescriptive. 
+Specifically within the HPC community, some claim that OpenACC is descriptive 
+while OpenMP is prescriptive~\cite{juckeland2016isc,wolfe16descriptive}. 
+While OpenACC provides more descriptive constructs in its most recent version 
+than OpenMP does, the \texttt{acc parallel loop} directive is prescriptive 
+since sometimes users want to \emph{prescribe} that a loop to be parallelized. 
 
 Alternatively, most OpenMP defaults allow the compiler freedom
 to choose details about how the computation is performed. Even
@@ -33,14 +29,13 @@ determine how many threads to use. So, one may see the issue
 as where to place a language, or even its constructs, on a 
 continuum of possible semantics.
 
-Second, even the view of placement on a continuum is overly
-limited and fails to address the overall preference of 
-programmers. Specifically, they would prefer that the compiler
-and runtime would always ``do the right thing'' given a 
-description of the computation to perform. However, in reality,
-compilers and runtimes often do not. In these instances,
-programmers prefer to have the ability to override the
-decisions and to specify exactly how to perform the computation.
+More importantly, choosing one place on that continuum is overly
+limited and fails to address the overall preference of programmers. 
+Specifically, they would prefer that the compiler and runtime would 
+always ``do the right thing'' given a description of the computation 
+to perform. However, in reality, compilers and runtimes often do not. 
+In these instances, programmers prefer to have the ability to override 
+their decisions and to prescribe exactly how to perform the computation.
 
 For these reasons, the emerging OpenMP philosophy is to provide
 mechanisms that describe the computation to perform and that
