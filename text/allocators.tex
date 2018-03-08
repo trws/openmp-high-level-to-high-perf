@@ -10,16 +10,15 @@ typically have limited capacity. To enable programmability of these
 technologies and portability across platforms, OpenMP~5.0 will include a 
 consistent and portable interface for placement within the memory hierarchy.
 
-The term \emph{memory space} refers to a memory resource available in the
-system when the OpenMP program is executed. Memory spaces differ in their 
-characteristics, for instance in bandwidth or capacity. OpenMP will define 
-intuitive pre-defined \emph{memory spaces} that map to memory resources in 
-HPC systems. An \emph{allocator} object allocates and frees memory from the 
-resources of the memory space to which it is associated when it is created. 
-OpenMP~5.0 will provide pre-defined memory allocators that match its 
-pre-defined memory spaces. For example, the pre-defined memory allocators 
-can select a memory space with large capacity, high bandwidth or low latency, 
-or memory local to a particular thread or thread team.
+A \emph{memory space} is a memory resource that is available in the system.
+Memory spaces differ in their characteristics, for instance in bandwidth or 
+capacity. OpenMP will define intuitive pre-defined memory spaces that map to 
+memory resources in HPC systems. An \emph{allocator} object allocates and 
+frees memory from the resources of the memory space to which it is associated 
+when it is created. OpenMP~5.0 will provide pre-defined memory allocators that
+match its pre-defined memory spaces. For example, the pre-defined memory 
+allocators can select a memory space with large capacity, high bandwidth or 
+low latency, or local to a particular thread or thread team.
 
 \begin{figure}
 \begin{minted}{c}
@@ -30,18 +29,26 @@ double *A = (double*) omp_alloc(N,
 \end{figure}
 
 OpenMP 5.0 will include the \texttt{omp\_alloc} and \texttt{omp\_free} 
-routines as supersets for \texttt{malloc} and \texttt{free} from 
-the standard library. The \texttt{allocate} directive allows to specify the allocation properties of variables that are not allocated through an API call such as global or stack variables. The \texttt{allocate} clause will directly specify 
-the use of an allocator for any construct that accepts data sharing clauses.
-It enables the allocation of \texttt{private} variables in a particular memory
-space. Figure~\ref{fig:allocators} illustrates the use of the pre-defined
+routines as supersets for \texttt{malloc} and \texttt{free}. The 
+\texttt{allocate} directive can specify allocation properties of variables 
+that are not allocated through an API call such as global or stack variables. 
+The \texttt{allocate} clause will directly specify the use of an allocator 
+for any construct that accepts data sharing clauses. It enables the allocation
+of \texttt{private} variables in a particular memory space. 
+Figure~\ref{fig:allocators} illustrates the use of the pre-defined 
 \texttt{omp\_high\_bw\_mem\_alloc} allocator to allocate memory from the 
 high bandwidth memory space.
 
 In order to support rapid adaption of existing programs to a specific memory 
-configuration, the pre-defined allocators are of type \texttt{omp\_allocator\_t *} and they can be treated as regular pointers in the program. Thus, they can be passed by argument and once 
-memory allocation uses the OpenMP API function, these code places do not 
-have to be modified again just to use a different memory space but just the allocator passed to the function needs to be adjusted.
+configuration, the pre-defined allocators have type 
+\texttt{omp\_allocator\_t *} and can be used as regular pointers. Thus, they 
+can be passed by argument and once memory allocation uses the OpenMP API 
+function, these code places do not have to be modified again just to use a 
+different memory space; the allocator passed to the function only needs to 
+be adjusted. Figure~\ref{fig:separation-concerns-alloc} illustrates how to
+select the memory policy that a function used to allocate the private array 
+\emph{some\_array}.
+
 
 \begin{figure}[t]
 \begin{minted}[fontsize=\footnotesize]{c}
@@ -61,9 +68,17 @@ some_function(omp_default_mem_alloc);
 \caption{Separate Memory Selection and Allocation\label{fig:separation-concerns-alloc}}
 \end{figure}
 
-Figure~\ref{fig:separation-concerns-alloc} illustrates how a function can be defined to allow callers to define the memory policy the function should use when allocating the private array \emph{some\_array}.
-
-In addition to pre-defined allocators OpenMP also offers the possibility of creating custom memory allocators where the user can further specify some traits of the allocator that change its behavior. Current traits allow to specify the desired memory alignment, the maximum pool size, the fallback behavior when failing to allocate memory and some hints that allow programmers to specify who will use the allocated memory or expected contention on the allocator.
+In addition to pre-defined allocators, OpenMP~5.0 will support creation of 
+custom memory allocators through which the user specifies additional traits 
+of the allocator. Current traits can specify the desired memory alignment, 
+the maximum pool size, the fallback behavior when failing to allocate memory 
+and some hints that specify the context in which the memory is expected to be
+used or the expected contention on the allocator. 
+Figure~\ref{fig:custom-allocator} shows an example that creates a custom 
+allocator. This allocator returns memory from the \emph{default memory space} 
+with 64-byte alignment that only the thread allocates the memory can access.
+This allocator can then be used in the previously presented API calls, 
+directives and clauses.
 
 \begin{figure}[t]
 \begin{minted}[fontsize=\footnotesize]{c}
@@ -77,4 +92,4 @@ omp_allocator_t *allocator =
 \caption{Custom Memory Allocator\label{fig:custom-allocator}}
 \end{figure}
 
-Figure~\ref{fig:custom-allocator} shows an example of how a custom allocator can be created in OpenMP~5.0. This particular allocator will return memory from the \emph{default memory space} with 64-byte alignment and the memory will only be accessible by the thread that does the allocations. This allocator can then be used in the previously presented API calls, directives and clauses.
+
