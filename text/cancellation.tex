@@ -15,13 +15,13 @@ that encounters it immediately proceeds to the end of the canceled region
 (e.g., the end of the current task for the \texttt{taskgroup} clause). Other
 threads must encounter a \emph{cancellation point}, prior to which the user 
 can manage state, in order to process the cancellation. Cancellation points 
-are implied at barriers and are explicitly indicated by a 
-\texttt{cancellation point} or \texttt{cancel} construct. If a thread observes 
-that another thread has canceled the associated region at a cancellation point,
-it also proceeds to the end of the canceled region (e.g., the end of the 
-current task). With the \texttt{taskgroup} clause, tasks that have not begun
-to execute are simply discarded since they cannot have state from partial 
-execution.
+are implied at barriers and are explicitly indicated by 
+\texttt{cancellation point} and \texttt{cancel} constructs. If a thread 
+observes that another thread has canceled the associated region at a 
+cancellation point, it also proceeds to the end of the canceled region 
+(e.g., the end of the current task). With the \texttt{taskgroup} clause, 
+tasks that have not begun to execute are simply discarded since they cannot 
+have state from partial execution.
 
 Figure~\ref{fig:Cancellation} shows how to cancel a binary tree search when 
 the value is found. Without the OpenMP directives, the code recursively 
