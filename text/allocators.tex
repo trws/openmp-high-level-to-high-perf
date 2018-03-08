@@ -22,8 +22,8 @@ low latency, or local to a particular thread or thread team.
 
 \begin{figure}
 \begin{minted}{c}
-double * A = (double * ) omp_alloc(N,
-             omp_high_bw_mem_alloc)
+double * A = (double * ) omp_alloc(N, 
+                omp_high_bw_mem_alloc);
 \end{minted}
 \caption{High-Bandwidth Memory Allocation\label{fig:allocators}}
 \end{figure}
