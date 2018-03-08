@@ -1,8 +1,7 @@
 \subsection{Cancellation}
 \label{sec:Cancellation}
-OpenMP~4.0 introduced the concept of cancellation, a capability to end 
-OpenMP regions \emph{early}. This capability enables efficient error
-handling but also supports more efficient search algorithms. When a thread
+OpenMP~4.0 introduced cancellation, which ends an OpenMP region \emph{early}
+to enable efficient error handling and more efficient algorithms. When a thread
 encounters a \texttt{cancel} construct, it cancels execution of the 
 inner-most associated region (as indicated by a \texttt{parallel}, 
 \texttt{sections}, \texttt{for} or \texttt{do} clause) or associated set 
