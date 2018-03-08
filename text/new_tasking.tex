@@ -1,17 +1,15 @@
 \subsection{Further Evolution of Tasking Support}
 \label{sub:new_tasking}
 
-OpenMP 5.0 continues the evolution of the OpenMP tasking model toward 
-addressing more use cases.  Task reductions, task affinity, and 
-additional forms of task dependences provide enhanced performance and 
-ease of use.  Prior to OpenMP 5.0, lack of support for explicit task 
-reductions required users to implement their own reductions by 
-collecting and later combining per-thread partial values, passing 
-partial values through the tree of tasks, or using locks or atomics 
-with resulting serialization of those operations.  The 
-\texttt{task\_reduction} clause allows a reduction over a task group, 
-and the \texttt{reduction} clause is extended to include reduction 
-over taskloops.  The \texttt{in\_reduction} clause appears on tasks that 
+OpenMP 5.0 continues to evolve the tasking model to address use cases. Task 
+reductions, task affinity, and additional forms of task 
+dependences enhance performance and ease of use. Prior to OpenMP 5.0, lack 
+of support for explicit task reductions required users to implement their 
+own reductions by collecting and later combining per-thread partial values, 
+passing partial values through the tree of tasks, or using locks or atomics 
+that serialize those operations. The \texttt{task\_reduction} clause allows 
+a reduction over a task group, and the \texttt{reduction} clause is available 
+on task loops. The \texttt{in\_reduction} clause appears on tasks that 
 participate in the reduction, which can include target tasks that 
 offload computation or transfer data to devices.
 
@@ -23,10 +21,11 @@ constraints that their executions are mutually exclusive and that
 they satisfy any dependences with respect to tasks outside the set.
 
 Like task dependences, task affinity indicates the data used by a task. 
-However, task affinity is a hint to the runtime that guides the scheduling 
-of tasks to threads, rather than enforcing an ordering among the threads. 
-The runtime may schedule tasks that use the same data to the same thread 
-or threads that execute on cores in the same NUMA  domain. An advanced 
-runtime may also use the information to tune work stealing for better 
-locality. Future versions of OpenMP may apply the \texttt{affinity} clause to other constructs besides the \texttt{task} construct.
+However, task affinity is a hint that guides the scheduling of tasks to 
+threads, rather than enforcing an ordering among the threads. Tasks that 
+use the same data can be scheduled to the same thread or to threads that 
+execute on cores in the same NUMA domain. An advanced runtime may also use 
+the information to tune work stealing for better locality. Future versions 
+of OpenMP may apply the \texttt{affinity} clause to other constructs besides 
+the \texttt{task} construct.
 
