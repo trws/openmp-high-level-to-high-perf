@@ -40,7 +40,7 @@ configuration, the pre-defined allocators are of type \texttt{omp\_allocator\_t 
 memory allocation uses the OpenMP API function, these code places do not 
 have to be modified again just to use a different memory space but just the allocator passed to the function needs to be adjusted.
 
-\begin{figure}[htb]
+\begin{figure}[t]
 \begin{minted}[fontsize=\footnotesize]{c}
 void some_function ( omp_allocator_t *allocator )
 {
@@ -55,14 +55,14 @@ void some_function ( omp_allocator_t *allocator )
 some_function(omp_high_bw_mem_alloc);
 some_function(omp_default_mem_alloc);
 \end{minted}
-\caption{Separating memory selection from allocation.\label{fig:separation-concerns-alloc}}
+\caption{Separate Memory Selection and Allocation\label{fig:separation-concerns-alloc}}
 \end{figure}
 
 Figure~\ref{fig:separation-concerns-alloc} illustrates how a function can be defined to allow callers to define the memory policy the function should use when allocating the private array \emph{some\_array}.
 
 In addition to pre-defined allocators OpenMP also offers the possibility of creating custom memory allocators where the user can further specify some traits of the allocator that change its behavior. Current traits allow to specify the desired memory alignment, the maximum pool size, the fallback behavior when failing to allocate memory and some hints that allow programmers to specify who will use the allocated memory or expected contention on the allocator.
 
-\begin{figure}[hbt]
+\begin{figure}[t]
 \begin{minted}[fontsize=\footnotesize]{c}
 omp_alloctraits_t *traits[]=
                  {{OMP_ATK_ALIGNMENT,64},
@@ -71,7 +71,7 @@ omp_allocator_t *allocator =
           omp_init_allocator(omp_default_mem_space,
                              2,traits);
 \end{minted}
-\caption{Creating a custom memory allocator.\label{fig:custom-allocator}}
+\caption{Custom Memory Allocator\label{fig:custom-allocator}}
 \end{figure}
 
 Figure~\ref{fig:custom-allocator} shows an example of how a custom allocator can be created in OpenMP~5.0. This particular allocator will return memory from the \emph{default memory space} with 64-byte alignment and the memory will only be accessible by the thread that does the allocations. This allocator can then be used in the previously presented API calls, directives and clauses.
