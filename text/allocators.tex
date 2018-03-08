@@ -1,8 +1,8 @@
 \subsection{Memory Allocation}
 \label{sub:allocators_and_hierarchical_memory}
 
-Memory hierarchies are expected to become deeper in future systems with the
-use of technologies such as high-bandwidth memory and non-volatile RAM. Each 
+Memory hierarchies will become deeper in future systems with the use of 
+technologies such as high-bandwidth memory and non-volatile RAM. Each 
 of these technologies has a different programming interface and distinct
 performance characteristics. Programming mechanisms must address these 
 differences and support intelligent data placement since the fastest resources
@@ -11,12 +11,15 @@ technologies and portability across platforms, OpenMP~5.0 will include a
 consistent and portable interface for placement within the memory hierarchy.
 
 The term \emph{memory space} refers to a memory resource available in the
-system when the OpenMP program is executed. Memory spaces differ in their characteristics, for instance in bandwidth or
-capacity. OpenMP will define intuitive pre-defined \emph{memory spaces} that map to memory resources found in today's HPC systems.
-
-An \emph{allocator} is an object that is associated to a memory space when created. It allows to allocate and free memory from the resources of its associated memory space. OpenMP will provide a set of pre-defined memory allocators that match its pre-defined memory spaces. For example, the pre-defined memory allocators can select a memory space with large capacity, high bandwidth or low latency, 
+system when the OpenMP program is executed. Memory spaces differ in their 
+characteristics, for instance in bandwidth or capacity. OpenMP will define 
+intuitive pre-defined \emph{memory spaces} that map to memory resources in 
+HPC systems. An \emph{allocator} object allocates and frees memory from the 
+resources of the memory space to which it is associated when it is created. 
+OpenMP~5.0 will provide pre-defined memory allocators that match its 
+pre-defined memory spaces. For example, the pre-defined memory allocators 
+can select a memory space with large capacity, high bandwidth or low latency, 
 or memory local to a particular thread or thread team.
-
 
 \begin{figure}
 \begin{minted}{c}
