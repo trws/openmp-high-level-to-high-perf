@@ -1,8 +1,8 @@
-\subsection{Allocators and Hierarchical Memory}
+\subsection{Memory Allocation}
 \label{sub:allocators_and_hierarchical_memory}
 
-Memory hierarchies are expected to become deeper in future systems with the
-use of technologies such as high-bandwidth memory and non-volatile RAM. Each 
+Memory hierarchies will become deeper in future systems with the use of 
+technologies such as high-bandwidth memory and non-volatile RAM. Each 
 of these technologies has a different programming interface and distinct
 performance characteristics. Programming mechanisms must address these 
 differences and support intelligent data placement since the fastest resources
@@ -10,35 +10,85 @@ typically have limited capacity. To enable programmability of these
 technologies and portability across platforms, OpenMP~5.0 will include a 
 consistent and portable interface for placement within the memory hierarchy.
 
-The term \emph{memory space} refers to a memory resource available in the
-system when the OpenMP program is executed. Memory spaces differ in their 
-characteristics, for instance in bandwidth or capacity. An \emph{allocator} 
-is an object that allocates and frees memory from a suitable memory space 
-and OpenMP will provide intuitive pre-defined memory allocators. The use of 
-an allocator expresses the intent to allocate memory from a memory space 
-with certain properties. For example, the pre-defined memory allocators 
-can select a memory space with large capacity, high bandwidth or low latency, 
-or memory local to a particular thread or thread team.
-
-OpenMP 5.0 will include the \texttt{omp\_alloc} and \texttt{omp\_free} 
-routines as direct replacements for \texttt{malloc} and \texttt{free} from 
-the standard library. The \texttt{allocate} clause will directly specify 
-the use of an allocator for any construct that accepts data sharing clauses.
-It enables the allocation of \texttt{private} variables in a particular memory
-space. Figure~\ref{fig:allocators} illustrates the use of the pre-defined
-\texttt{omp\_high\_bw\_mem\_alloc} allocator to allocate memory from the 
-high bandwidth memory space.
+A \emph{memory space} is a memory resource that is available in the system.
+Memory spaces differ in their characteristics, for instance in bandwidth or 
+capacity. OpenMP will define intuitive pre-defined memory spaces that map to 
+memory resources in HPC systems. An \emph{allocator} object allocates and 
+frees memory from the resources of the memory space to which it is associated 
+when it is created. OpenMP~5.0 will provide pre-defined memory allocators that
+match its pre-defined memory spaces. For example, the pre-defined memory 
+allocators can select a memory space with large capacity, high bandwidth or 
+low latency, or local to a particular thread or thread team.
 
 \begin{figure}
 \begin{minted}{c}
-double * A = (double * ) 
-    omp_alloc(N, &omp_high_bw_mem_alloc);
+double * A = (double * ) omp_alloc(N, 
+                omp_high_bw_mem_alloc);
 \end{minted}
 \caption{High-Bandwidth Memory Allocation\label{fig:allocators}}
 \end{figure}
 
+OpenMP 5.0 will include the \texttt{omp\_alloc} and \texttt{omp\_free} 
+routines as supersets for \texttt{malloc} and \texttt{free}. The 
+\texttt{allocate} directive can specify allocation properties of variables 
+that are not allocated through an API call such as global or stack variables. 
+The \texttt{allocate} clause will directly specify the use of an allocator 
+for any construct that accepts data sharing clauses. It enables the allocation
+of \texttt{private} variables in a particular memory space. 
+Figure~\ref{fig:allocators} illustrates the use of the pre-defined 
+\texttt{omp\_high\_bw\_mem\_alloc} allocator to allocate memory from the 
+high bandwidth memory space.
+
 In order to support rapid adaption of existing programs to a specific memory 
-configuration, the pre-defined allocators are of type 
-\texttt{omp\_allocator\_t}. Thus, they can be passed by argument and once 
-memory allocation uses the OpenMP API function, these code places do not 
-have to be modified again just to use a different memory space.
+configuration, the pre-defined allocators have type 
+\texttt{omp\_allocator\_t *} and can be used as regular pointers. Thus, they 
+can be passed by argument and once memory allocation uses the OpenMP API 
+function, these code places do not have to be modified again just to use a 
+different memory space; the allocator passed to the function only needs to 
+be adjusted. Figure~\ref{fig:separation-concerns-alloc} illustrates how to
+select the memory policy that a function used to allocate the private array 
+\emph{some\_array}.
+
+
+\begin{figure}[t]
+\begin{minted}[fontsize=\footnotesize]{c}
+void some_function (omp_allocator_t * allocator) {
+  double some_array[N];
+  #pragma omp parallel private(some_array)        \
+                     allocate(allocator:some_array)
+  {
+     ...
+  }
+}
+
+some_function(omp_high_bw_mem_alloc);
+some_function(omp_default_mem_alloc);
+\end{minted}
+\caption{Separate Memory Selection and Allocation\label{fig:separation-concerns-alloc}}
+\end{figure}
+
+In addition to pre-defined allocators, OpenMP~5.0 will support creation of 
+custom memory allocators through which the user specifies additional traits 
+of the allocator. Current traits can specify the desired memory alignment, 
+the maximum pool size, the fallback behavior when failing to allocate memory 
+and some hints that specify the context in which the memory is expected to be
+used or the expected contention on the allocator. 
+Figure~\ref{fig:custom-allocator} shows an example that creates a custom 
+allocator. This allocator returns memory from the \emph{default memory space} 
+with 64-byte alignment that only the thread allocates the memory can access.
+This allocator can then be used in the previously presented API calls, 
+directives and clauses.
+
+\begin{figure}[t]
+\begin{minted}[fontsize=\footnotesize]{c}
+omp_alloctraits_t *traits[]=
+                 {{OMP_ATK_ALIGNMENT,64},
+                  {OMP_ATK_ACCESS,OMP_ATV_THREAD}};
+omp_allocator_t *allocator = 
+          omp_init_allocator(omp_default_mem_space,
+                             2,traits);
+\end{minted}
+\caption{Custom Memory Allocator\label{fig:custom-allocator}}
+\end{figure}
+
+

@@ -1,0 +1,16 @@
+\subsection{Memory Allocation Extensions}
+
+While OpenMP 5.0 will introduce the major building blocks for memory 
+allocation support (memory spaces, allocators and APIs) we will extend 
+this support. One such direction will be to allow users to determine
+the memory resources of a particular system and to create memory spaces with 
+a more precise description and not just to rely on pre-defined ones. The 
+number of allocator traits will increase to allow users to specify a larger 
+range of behaviors. For example, we envision traits that support: memory
+pinning; distribution of allocations across NUMA domains; fixed-object 
+allocations (i.e., where all allocation invocations have the same size);
+and allocators with stack semantics. We will also eventually improve
+support of allocation of variables specified in \texttt{map} clauses, as
+well as C++ variables generally. 
+
+ 

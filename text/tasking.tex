@@ -116,7 +116,7 @@ but a version that uses task dependences provides the best performance.
 
 As stated previously, the \texttt{taskwait} construct requires that all child 
 tasks of the current task must compete. The \texttt{taskgroup} construct 
-allows the current task to wait on only subset of its children, while others 
+allows the current task to wait on only a subset of its children, while others 
 may continue executing beyond the synchronization point. Also, the construct
 requires that all descendant tasks of that subset complete execution, which
 we call \emph{deep synchronization}. Because some children of the current 
@@ -132,7 +132,7 @@ Figure~\ref{fig:TaskloopExample} uses the construct to parallelize a
 \emph{saxpy} operation. The \texttt{num\_tasks} clause specifies the number of 
 tasks to create for the loop. Alternatively, users specify the minimum number 
 of loop iterations per task with the \texttt{grainsize} clause. OpenMP~4.5
-also includes a combine \texttt{taskloop simd} construct to use SIMD 
+also includes a combined \texttt{taskloop simd} construct to use SIMD 
 parallelism in the generated tasks.
 
 \begin{figure}

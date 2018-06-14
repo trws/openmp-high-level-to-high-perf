@@ -76,20 +76,20 @@ data structures like the linked list in Figure~\ref{fig:unified} on systems
 that do not provide coherent unified memory. With OpenMP~4.5, the user must 
 map each piece of the structure and must then assign the pointers on the 
 device to those pieces either with explicit assignments or with further 
-mapping actions. The user often must repeat this verbose, complex and error 
-prone code sequence every time an instance of the data structure is needed 
-on the device. Instead, the \texttt{declare mapper} directive in OpenMP 5.0 
-will allow the user to describe how to map an instance of the data structure 
-including the targets of pointers. The user can then use this definition in 
-a \texttt{map} clause whenever an instance of the data structure is needed 
-on the device. Overall, the descriptions in the \texttt{declare mapper} 
-directive are simpler than the OpenMP~4.5 mechanism and eliminate the 
-repetition. Figure~\ref{fig:mapper} shows an example that maps a multi-level 
-data structure with the \texttt{declare mapper} directive.  The directive in 
-the \texttt{Vec} class uses a \texttt{map} clause to describe how to map the 
-data that is the target of the pointer member for any instance of the class.  
-This version works for any target platform, including those that do not 
-support unified memory.
+mapping actions. The user often must repeat this verbose, complex and 
+error-prone code sequence every time an instance of the data structure is 
+needed on the device. Instead, the \texttt{declare mapper} directive in 
+OpenMP~5.0 will allow the user to describe how to map an instance of the 
+data structure including the targets of pointers. The user can then use 
+this definition in a \texttt{map} clause whenever an instance of the data 
+structure is needed on the device. Overall, the descriptions in the 
+\texttt{declare mapper} directive are simpler than the OpenMP~4.5 mechanism 
+and eliminate the repetition. Figure~\ref{fig:mapper} shows an example that 
+maps a multi-level data structure with the \texttt{declare mapper} directive.
+The directive in  the \texttt{Vec} class uses a \texttt{map} clause to 
+describe how to map the data that is the target of the pointer member for any 
+instance of the class. This version works for any target platform, including 
+those that do not support unified memory.
 
 \begin{figure}
 \begin{minted}{cpp}
