@@ -9,7 +9,7 @@ Thank you for the notes. We have fixed both issues that you noted.
 
 Reviewer 2:
 
-We attempted to capture major additions to OPenMP in Figure 1 by 
+We attempted to capture major additions to OpenMP in Figure 1 by 
 marking where tasks, SIMD and device offload were added.
 
 Additions are generated in a variety of ways and for a variety of 
@@ -26,9 +26,11 @@ current translation unit. Either of these can be made possible, or
 proven safe, by user annotation in cases for which compiler analysis
 would be at the very least impractical if not impossible.
 
----- don't like violated dependence
-
----- last sentence of 3.2
+Section 3.2 has been reworded slightly to attempt to better make the point,
+which is that while serial equivalence is something we want to enable users to
+produce with OpenMP features, it is not a goal to make OpenMP constructs
+serially equivalent by default due to the relatively high additional costs that
+guarantee can require.
 
 We have chosen not to change the captions. The comment involves an issue of
 style. Every style guide with which the authors are familiar states that
@@ -47,7 +49,7 @@ important aspect of the principles that will shape the continued
 evolution of OpenMP.
 
 We agree that a list of OpenMP compilers and the versions/features 
-tht they support is helpful. However, it is not within the scope of 
+that they support is helpful. However, it is not within the scope of 
 the paper and could only capture one moment in time. So, we have added 
 a reference to a web page that hosts a listing of compilers with their 
 support along with a note on it at a high level. The page is regularly
