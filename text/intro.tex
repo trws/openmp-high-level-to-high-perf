@@ -58,17 +58,21 @@ first specification.
 \caption{Basic OpenMP\label{fig:basic}}
 \end{figure}
 
-Over time, additional vendors and research organizations joined the effort.  
-A non-profit corporation, the OpenMP Architecture Review Board~(ARB), was 
-created to prevent any single vendor from dominating the standard. The 
-current 30 members of the OpenMP ARB continue to own and to evolve the API 
-to serve the needs of parallel application programmers. The ARB retains many 
-of the original goals in its current mission, which is to standardize 
-directive-based multi-language high-level parallelism that is performant, 
-productive and portable. The OpenMP API now provides a portable, scalable 
-model that gives parallel programmers a simple and flexible interface for 
-developing parallel applications for platforms ranging from embedded systems 
-and accelerator devices to multicore systems.
+Over time, additional vendors and research organizations joined the effort.  A
+non-profit corporation, the OpenMP Architecture Review Board~(ARB), was created
+to prevent any single vendor from dominating the standard. The current 30
+members of the OpenMP ARB continue to own and to evolve the API to serve the
+needs of parallel application programmers. The ARB retains many of the original
+goals in its current mission, which is to standardize directive-based
+multi-language high-level parallelism that is performant, productive and
+portable. The OpenMP API now provides a portable, scalable model that gives
+parallel programmers a simple and flexible interface for developing parallel
+applications for platforms ranging from embedded systems and accelerator
+devices to multicore systems.  A simple example of the iconic workshared
+parallel for loop is shown in Figure~\ref{fig:basic}, showing the basic
+fork-join model of parallel with a workshared loop and a reduction in OpenMP
+syntax that has been valid from the first release of the C version of the
+specification until today.
 
 OpenMP retains all but two of its original goals. Specifically, OpenMP has 
 evolved to support almost all parallel programming patterns, which necessarily
