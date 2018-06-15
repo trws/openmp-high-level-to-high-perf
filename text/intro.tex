@@ -47,7 +47,8 @@ first specification.
 \begin{minted}{c}
 #pragma omp parallel // fork
 {
-  // share the loop across threads, reducing into total
+  // share the loop across threads,
+  // reducing into total
   #pragma omp for reduction(+:total)
   for (int i=0; i<N; ++i) {
     total += foo(i);
