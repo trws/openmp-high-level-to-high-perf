@@ -1,0 +1,54 @@
+
+We thank the reviewers for their comments, which have
+helped us to improve the paper. We detail how we have
+handled their specific comments in the rest of this document.
+
+Reviewer 1:
+
+Thank you for the notes. We have fixed both issues that you noted.
+
+Reviewer 2:
+
+We attempted to capture major additions to OPenMP in Figure 1 by 
+marking where tasks, SIMD and device offload were added.
+
+Additions are generated in a variety of ways and for a variety of 
+reasons. We added a discussion of the process at a high level to 
+the beginning of the Evolution section of the paper.
+
+We tweaked the sentence on the subject of directives allowing the 
+user to specify things the compiler cannot analyze, but the general 
+point remains true. In a variety of cases, the user has information 
+the compiler does not have for any number of reasons. Alias analysis 
+in C and C++ is a common example; another example is the ability to 
+vectorize a function call to a function that is not defined in the 
+current translation unit. Either of these can be made possible, or 
+proven safe, by user annotation in cases for which compiler analysis
+would be at the very least impractical if not impossible.
+
+---- don't like violated dependence
+
+---- last sentence of 3.2
+
+We have chosen not to change the captions. The comment involves an issue of
+style. Every style guide with which the authors are familiar states that
+captions are titles. They should be short; they should not be paragraphs.
+Detailed explanations should be contained in the body text, which must
+explain the figures and not just reference them.  The body text should 
+stand on its own. While many writers of technical documents choose to 
+ignore these style guidelines, we do not agree with that choice.
+
+On the topic of descriptive vs prescriptive abstractions, while we
+appreciate that the reviewer agrees with our position, many do not, 
+at least currently. We state our position in a long-running and rather 
+heated debate between the approaches taken by the OpenMP offload model 
+versus the one taken by OpenACC, among others. The discussion is an 
+important aspect of the principles that will shape the continued 
+evolution of OpenMP.
+
+We agree that a list of OpenMP compilers and the versions/features 
+tht they support is helpful. However, it is not within the scope of 
+the paper and could only capture one moment in time. So, we have added 
+a reference to a web page that hosts a listing of compilers with their 
+support along with a note on it at a high level. The page is regularly
+updated and provides a better resource to readers overall.
