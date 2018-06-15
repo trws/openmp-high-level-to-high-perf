@@ -43,6 +43,20 @@ on current practice. This focus led to the availability of multiple
 vendor-supported implementations within a year of the release of the 
 first specification. 
 
+\begin{figure}
+\begin{minted}{c}
+#pragma omp parallel // fork
+{
+  // share the loop across threads, reducing into total
+  #pragma omp for reduction(+:total)
+  for (int i=0; i<N; ++i) {
+    total += foo(i);
+  }
+} // join
+\end{minted}
+\caption{Basic OpenMP\label{fig:basic}}
+\end{figure}
+
 Over time, additional vendors and research organizations joined the effort.  
 A non-profit corporation, the OpenMP Architecture Review Board~(ARB), was 
 created to prevent any single vendor from dominating the standard. The 
