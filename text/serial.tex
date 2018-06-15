@@ -19,9 +19,9 @@ uses two or more threads and different threads execute the two tasks.
 Figure~\ref{fig:trivial_target} shows a simple example for accelerators in
 which ``incremented'' is always printed, while ``incremented again'' may or may
 not print with OpenMP, depending on whether the host and accelerator share
-memory. Beyond these many constructs are natively unordered, for example since
-reductions operate in an unknown order using them with floating point types
-rarely produces serial equivalence.
+memory. Beyond these simple examples, many constructs and clauses are natively
+unordered. For example since reductions operate in an unknown order using them
+with floating point types rarely produces serial equivalence.
 
 \begin{figure}
 \begin{minted}{c}
@@ -81,6 +81,6 @@ implies more opportunities not to exhibit serial equivalence or would require
 more execution order limitations, which would limit performance. OpenMP tries
 to avoid those limitations unless the programmer requires them. Thus, the
 philosophy of OpenMP remains to provide constructs that can be used to build
-programs with serial equivalence when desired but frequently does not guarantee
+programs with serial equivalence when desired but often does not guarantee
 it without additional work.
 
