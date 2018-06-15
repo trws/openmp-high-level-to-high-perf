@@ -29,6 +29,20 @@ header.pdf: $(tex_files) $(bib_files) $(pdf_files) $(tikz_files) $(code_files) s
 	done ; \
 	rm latex.out ; \
 
+revision.pdf: revision.tex
+	pdflatex -synctex=1 -shell-escape revision | tee latex.out ; \
+	if grep -q '^LaTeX Warning: Citation.*undefined' latex.out; then \
+		${BIBTEX} revision; \
+		touch .rebuild; \
+	fi ; \
+	while [ -f .rebuild -o \
+		-n "`grep -e '^LaTeX Warning:.*Rerun' -e 'natbib.*Rerun' latex.out`" ]; do \
+		rm -f .rebuild; \
+		${BIBTEX} revision; \
+		pdflatex -synctex=1 -shell-escape revision | tee latex.out; \
+	done ; \
+	rm latex.out ; \
+
 complete: all
 
 clean:

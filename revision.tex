@@ -1,0 +1,116 @@
+\PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provides euro and other symbols
+\else % if luatex or xelatex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\usepackage{hyperref}
+\hypersetup{
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+
+\date{}
+
+\begin{document}
+
+We thank the reviewers for their comments, which have helped us to
+improve the paper. We detail how we have handled their specific comments
+in the rest of this document.
+
+Reviewer 1:
+
+Thank you for the notes. We have fixed both issues that you noted.
+
+Reviewer 2:
+
+We attempted to capture major additions to OpenMP in Figure 1 by marking
+where tasks, SIMD and device offload were added.
+
+Additions are generated in a variety of ways and for a variety of
+reasons. We added a discussion of the process at a high level to the
+beginning of the Evolution section of the paper.
+
+We tweaked the sentence on the subject of directives allowing the user
+to specify things the compiler cannot analyze, but the general point
+remains true. In a variety of cases, the user has information the
+compiler does not have for any number of reasons. Alias analysis in C
+and C++ is a common example; another example is the ability to vectorize
+a function call to a function that is not defined in the current
+translation unit. Either of these can be made possible, or proven safe,
+by user annotation in cases for which compiler analysis would be at the
+very least impractical if not impossible.
+
+Section 3.2 has been reworded slightly to attempt to better make the
+point, which is that while serial equivalence is something we want to
+enable users to produce with OpenMP features, the goal is not to make
+OpenMP constructs serially equivalent by default due to the relatively
+high additional costs that guarantee can require.
+
+We have chosen not to change the captions. The comment involves an issue
+of style. Every style guide with which the authors are familiar states
+that captions are titles. They should be short; they should not be
+paragraphs. Detailed explanations should be contained in the body text,
+which must explain the figures and not just reference them. The body
+text should stand on its own. While many writers of technical documents
+choose to ignore these style guidelines, we do not agree with that
+choice.
+
+On the topic of descriptive vs prescriptive abstractions, while we
+appreciate that the reviewer agrees with our position, many do not, at
+least currently. We state our position in a long-running and rather
+heated debate between the approaches taken by the OpenMP offload model
+versus the one taken by OpenACC, among others. The discussion is an
+important aspect of the principles that will shape the continued
+evolution of OpenMP.
+
+We agree that a list of OpenMP compilers and the versions/features that
+they support is helpful. However, it is not within the scope of the
+paper and could only capture one moment in time. So, we have added a
+reference to a web page that hosts a listing of compilers with their
+support along with a note on it at a high level. The page is regularly
+updated and provides a better resource to readers overall.
+
+\end{document}
