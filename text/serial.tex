@@ -11,15 +11,17 @@ thread number (or ID) that executed a region. Thus, trivial programs could
 fail to exhibit serial equivalence. Today, many more opportunities exist
 to write OpenMP programs that do not provide serial equivalence. 
 
-As OpenMP has evolved, the opportunities to write programs that do not
-exhibit serial equivalence have increased. Figure~\ref{fig:trivial_task} 
-provides a simple tasking program in which the serial version has an infinite 
-loop while the parallel version will complete quickly, assuming that the 
-parallel region uses two or more threads and different threads execute the 
-two tasks. Figure~\ref{fig:trivial_target} shows a simple example for 
-accelerators in which ``incremented'' is always printed, while 
-``incremented again'' may or may not print with OpenMP, depending on 
-whether the host and accelerator share memory. 
+As OpenMP has evolved, the opportunities to write programs that do not exhibit
+serial equivalence have increased. Figure~\ref{fig:trivial_task} provides a
+simple tasking program in which the serial version has an infinite loop while
+the parallel version will complete quickly, assuming that the parallel region
+uses two or more threads and different threads execute the two tasks.
+Figure~\ref{fig:trivial_target} shows a simple example for accelerators in
+which ``incremented'' is always printed, while ``incremented again'' may or may
+not print with OpenMP, depending on whether the host and accelerator share
+memory. Beyond these many constructs are natively unordered, for example since
+reductions operate in an unknown order using them with floating point types
+rarely produces serial equivalence.
 
 \begin{figure}
 \begin{minted}{c}
@@ -72,13 +74,13 @@ void example2() {
 \end{figure}
 
 
-In general, serial equivalence requires the program or runtime to limit
-the possible execution orders. As OpenMP has grown to support more parallel 
-programming patterns, the range of execution orders has also grown, which 
+In general, serial equivalence requires the program or runtime to limit the
+possible execution orders. As OpenMP has grown to support more parallel
+programming patterns, the range of execution orders has also grown, which
 implies more opportunities not to exhibit serial equivalence or would require
-more execution order limitations, which would limit performance. OpenMP tries 
-to avoid those limitations unless the programmer requires them. Thus, the 
-philosophy of OpenMP remains to provide constructs that simplify the 
-enforcement of serial equivalence when desired but has evolved not 
-to limit parallelism and, by extension, performance unnecessarily.
+more execution order limitations, which would limit performance. OpenMP tries
+to avoid those limitations unless the programmer requires them. Thus, the
+philosophy of OpenMP remains to provide constructs that can be used to build
+programs with serial equivalence when desired but frequently does not guarantee
+it without additional work.
 
