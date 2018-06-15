@@ -28,7 +28,7 @@ would be at the very least impractical if not impossible.
 
 Section 3.2 has been reworded slightly to attempt to better make the point,
 which is that while serial equivalence is something we want to enable users to
-produce with OpenMP features, it is not a goal to make OpenMP constructs
+produce with OpenMP features, the goal is not to make OpenMP constructs
 serially equivalent by default due to the relatively high additional costs that
 guarantee can require.
 
