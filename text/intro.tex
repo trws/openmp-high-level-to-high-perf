@@ -67,11 +67,13 @@ goals in its current mission, which is to standardize directive-based
 multi-language high-level parallelism that is performant, productive and
 portable. The OpenMP API now provides a simple and flexible model that gives
 for developing parallel applications for platforms ranging from embedded
-systems and accelerator devices to multicore systems.  A simple example of the
-iconic workshared parallel for loop is shown in Figure~\ref{fig:basic}, showing
-the basic fork-join model of parallel with a workshared loop and a reduction in
-OpenMP syntax that has been valid from the first release of the C version of
-the specification until today.
+systems and accelerator devices to multicore systems. Figure~\ref{fig:basic}
+shows a simple OpenMP example in which \code{parallel} and \code{for}
+directives specify that the basic fork-join parallelism model should 
+create threads and share the iterations of the loop across them, with 
+a reduction performed on the values computed in those threads. This
+OpenMP syntax has been valid since the release of the first C version of
+the specification.
 
 OpenMP retains all but two of its original goals. Specifically, OpenMP has 
 evolved to support almost all parallel programming patterns, which necessarily
