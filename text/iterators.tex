@@ -25,7 +25,8 @@ elements. Figure~\ref{fig:iterators} shows how this feature supports a
 \begin{figure}
 \begin{minted}{c}
 void func(double * a, size_t n) {
-#pragma omp task depend(inout:a[i]:i=0:n)
+#pragma omp task \
+    depend(iterator(i=0:n):inout:a[i])
    work(a);
 }
 \end{minted}
