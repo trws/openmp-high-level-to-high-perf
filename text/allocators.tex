@@ -67,16 +67,16 @@ some_function(omp_default_mem_alloc);
 \caption{Separate Memory Selection and Allocation\label{fig:separation-concerns-alloc}}
 \end{figure}
 
-In addition to pre-defined allocators, OpenMP~5.0 will support creation of 
-custom memory allocators through which the user specifies additional traits 
-of the allocator. Current traits can specify the desired memory alignment, 
+Besides pre-defined allocators, OpenMP~5.0 will support creation of custom 
+memory allocators through which the user can specify additional traits.
+Current traits can specify the desired memory alignment, 
 the maximum pool size, the fallback behavior when failing to allocate memory 
 and some hints that specify the context in which the memory is expected to be
 used or the expected contention on the allocator. 
 Figure~\ref{fig:custom-allocator} shows an example that creates a custom 
 allocator. This allocator returns memory from the \emph{default memory space} 
-with 64-byte alignment that only the thread allocates the memory can access.
-This allocator can then be used in the previously presented API calls, 
+with 64-byte alignment that only the thread that allocates the memory can 
+access. This allocator can then be used in the previously presented API calls, 
 directives and clauses.
 
 \begin{figure}[t]
