@@ -1,13 +1,13 @@
 \subsection{Serial Equivalence}
 \label{sub:serial_equivalence}
 
-An original goal for OpenMP was to support serial equivalence to the 
-greatest possible extent. As a result, many think that all OpenMP programs, 
-or at least all correct OpenMP programs, are guaranteed the same result
-if the code is executed in parallel as when the compiler completely 
+An original goal for OpenMP was to support serial equivalence as much
+as possible. As a result, many think that all OpenMP programs, 
+or at least all correct OpenMP programs, are guaranteed to produce the same 
+result if the code is executed in parallel as when the compiler completely 
 ignores all OpenMP constructs. However, even OpenMP 1.0 included runtime
 functions that allow a program to depend on the number of threads or the
-thread number (or ID) that executed a region. Thus, trivial programs could
+thread number that executed a region. Thus, trivial programs could
 fail to exhibit serial equivalence. Today, many more opportunities exist
 to write OpenMP programs that do not provide serial equivalence. 
 
