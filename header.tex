@@ -92,7 +92,7 @@
 
 \IEEEoverridecommandlockouts
 % NOTE: manually balance reference columns
-\IEEEtriggeratref{6}
+% \IEEEtriggeratref{6}
 
 \begin{document}
 
@@ -155,8 +155,6 @@ The Ongoing Evolution of OpenMP
 % GPGPU; OpenMP; Programming models; Co-scheduling;
 % \end{IEEEkeywords}
 
-% \tom{need to update keywords}
-
 \input{text/abstract}
 \input{text/intro}
 \input{text/evolve}
@@ -168,23 +166,25 @@ The Ongoing Evolution of OpenMP
 \input{text/conclusions}
 \input{text/acknowledgments}
 
-% \begin{spacing}{0.9}
+\begin{spacing}{0.9}
+% \bibliographystyle{IEEEtran}
 \bibliographystyle{style/abbrv}
 % \balance
 \bibliography{bib/tom-papers}
-% \end{spacing}
+\end{spacing}
 
 % BIOS START HERE: 
 
  \graphicspath{{authors/}}
 
 {\footnotesize
+\vfill
 \input{authors/bronis.tex}
 % \vspace{1ex}
 \vfill
 \input{authors/tom.tex}
 % \vspace{1ex}
-\vfill
+% \vfill
 \input{authors/alex.tex}
 % \vspace{1ex}
 \vfill
@@ -195,13 +195,13 @@ The Ongoing Evolution of OpenMP
 \vfill
 \input{authors/stephen.tex}
 % \vspace{1ex}
-% \vfill
-\input{authors/christian.tex}
-\vspace{1ex}
-% \vfill
-\input{authors/tim.tex}
-\vspace{1ex}
 \vfill
+\input{authors/christian.tex}
+% \vspace{1ex}
+\vfill
+\input{authors/tim.tex}
+% \vspace{1ex}
+% \vfill
 }
 
 % BIOS END HERE
